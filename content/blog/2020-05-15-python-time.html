@@ -145,14 +145,5 @@ shelter %&gt;% group_by(animal) %&gt;% summarise(avg=mean(time))</code></pre>
 ##   &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt;
 ## 1 cat        2     8
 ## 2 dog        1     6</code></pre>
-</div>
-<div id="a-little-fun-with-linear-regression" class="section level3">
-<h3>A Little fun with linear regression</h3>
-<pre class="r"><code>#now that we&#39;ve manipulated the data in both python and r and imported it to r. 
-
-fit1&lt;-lm(dist~speed, data=cars) #syntax for simple linear regression
-coef(fit1)</code></pre>
-<pre><code>## (Intercept)       speed 
-##  -17.579095    3.932409</code></pre>
-<p>This shows the many possibilities of combining r and</p>
+<p>This shows the many possibilities of combining r and python without having to load in additional python packages such as pandas or numpy (mostly because my computer completely force quitted r everytime I tried to load them). They can work together to do any number of things, this is just a demonstration of list manipulation and going between python and r.</p>
 </div>
