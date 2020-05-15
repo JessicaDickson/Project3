@@ -1,0 +1,1 @@
+[2,"Error in parse(file = script, keep.source = TRUE, encoding = encoding) : \n  /var/folders/fm/y9275x0x31vfn8xd3mtv5x4w0000gn/T/2243-57b7-2c8e-334b:10:1: unexpected '['\n9: \n10: [\n    ^\nCalls: sourceWithProgress -> parse\nExecution halted\n"]

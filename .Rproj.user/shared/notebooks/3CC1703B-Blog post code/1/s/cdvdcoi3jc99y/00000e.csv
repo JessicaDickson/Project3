@@ -1,0 +1,5 @@
+"0","count(shelter)
+"
+"2","Error in UseMethod(""summarise_"") : 
+  no applicable method for 'summarise_' applied to an object of class ""c('matrix', 'character')""
+"

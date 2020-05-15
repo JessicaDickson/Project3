@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Portfolio</title>
+    <link>/</link>
+    <description>Recent content on Portfolio</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Sun, 02 Oct 2016 22:55:05 -0400</lastBuildDate>
+    
+	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Python Time</title>
+      <link>/blog/python-time/</link>
+      <pubDate>Fri, 15 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/python-time/</guid>
+      <description>After taking this computational biology course, I have learned a number of ways to use both R and Python for data science. One of the most interesting things i’ve learned is how to make R and Python work together to manipulate list variables. I will now demonstrate how to create, sort, and combine lists in python and then manipulate the combined list in R to create a working dataset.  Before I can begin working with Python in Rstudio, I must load in the required packages as well as the data “skulls” #R #install.</description>
+    </item>
+    
+    <item>
+      <title>Projects</title>
+      <link>/projects/</link>
+      <pubDate>Sun, 02 Oct 2016 22:55:05 -0400</pubDate>
+      
+      <guid>/projects/</guid>
+      <description>Projects Below are a few projects I have created for my computational biology course. These demonstrate my skills in R and RStudio for data science:
+  Exploratory Data Analysis with Tidyverse Tools (Computational Biology Project)
+  Modeling, Testing, and Classification (Computational Biology Project)
+  Roger Springs Archaeological Site Analysis (Biostatistics Project using the data from my honor&amp;rsquo;s thesis project)
+  </description>
+    </item>
+    
+    <item>
+      <title>Project 1 by Sloan Dickson (JSD2385)</title>
+      <link>/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project1/</guid>
+      <description>Bug Bois (Project 1): Sloan Dickson (JSD2385) Introduciton These datasets are from the iNaturalist website which collects wildlife data. The website collects this data from members who identify wildlife in their daily lives and submit the location, species identification, specimen descriptions, and photographs/audio recordings as well as a number of other variables. The iNaturalist community then looks at these submissions and tries to correctly identify the species and give more detail on its taxonomy and whether it belongs in that location or is invasive.</description>
+    </item>
+    
+    <item>
+      <title>Project 2 - Ancient Egyptian Skulls</title>
+      <link>/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project2/</guid>
+      <description>Introduction The dataset chosen for this project is called skulls. Skulls is a collection of measurements of ancient adult skulls found in Egypt. There are 150 skulls measured (30 from each time frame) and 5 variables. The explanatory variables include: epoch (c4000BCE, c3300BCE, c1850BCE, c200BCE, and c150CE), basibregmatic height (mm), basialiveolar length (mm), and nasal height (mm). The response variable that this project will study is maximum breath (mm).</description>
+    </item>
+    
+  </channel>
+</rss>

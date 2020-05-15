@@ -1,0 +1,91 @@
+"0","```r
+library(tidyverse)
+library(dplyr)
+beetles<-read.csv(\"~/Project_1/beetles_2019.csv\")
+usa<- read.csv(\"~/Project_1/usa_insects.csv\")
+glimpse(beetles)
+```"
+"1","Observations: 8,462
+Variables: 38
+$ id                               [3m[38;5;246m<int>[39m[23m 18177129, 19251162, 19342293, 19343255, 19343633, …
+$ observed_on_string               [3m[38;5;246m<fct>[39m[23m 2019-03-29, 2019-01-03 4:54:22 p.m. GMT+00:00, Tue…
+$ observed_on                      [3m[38;5;246m<fct>[39m[23m 2019-03-29, 2019-01-03, 2019-01-01, 2019-01-01, 20…
+$ time_observed_at                 [3m[38;5;246m<fct>[39m[23m , 2019-01-03 16:54:22 UTC, 2018-12-31 23:27:26 UTC…
+$ time_zone                        [3m[38;5;246m<fct>[39m[23m Quito, Edinburgh, Brisbane, Asia/Magadan, Nuku'alo…
+$ out_of_range                     [3m[38;5;246m<fct>[39m[23m , , , , , , , , , , , , , , , , , , , , , , , , , …
+$ user_login                       [3m[38;5;246m<fct>[39m[23m fcheca, bee-man, pierswarmers, lileb, delautourt, …
+$ created_at                       [3m[38;5;246m<fct>[39m[23m 2018-11-06 20:20:53 UTC, 2018-12-27 16:53:42 UTC, …
+$ updated_at                       [3m[38;5;246m<fct>[39m[23m 2019-03-30 20:01:38 UTC, 2019-01-03 17:13:56 UTC, …
+$ quality_grade                    [3m[38;5;246m<fct>[39m[23m research, needs_id, research, research, needs_id, …
+$ description                      [3m[38;5;246m<fct>[39m[23m , , Huge beetle. About 10cm long. Very active. Mad…
+$ id_please                        [3m[38;5;246m<fct>[39m[23m false, false, false, false, false, false, false, f…
+$ num_identification_agreements    [3m[38;5;246m<int>[39m[23m 3, 0, 2, 1, 1, 1, 3, 1, 1, 3, 2, 4, 1, 2, 1, 1, 1,…
+$ num_identification_disagreements [3m[38;5;246m<int>[39m[23m 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,…
+$ captive_cultivated               [3m[38;5;246m<fct>[39m[23m false, false, false, false, false, false, false, f…
+$ oauth_application_id             [3m[38;5;246m<int>[39m[23m NA, 2, 3, 3, 2, 111, 3, NA, 3, 111, 111, 3, 3, 3, …
+$ place_guess                      [3m[38;5;246m<fct>[39m[23m \"Guajalito\", \"56A Danecourt Rd, Poole BH14 0PQ, UK…
+$ latitude                         [3m[38;5;246m<dbl>[39m[23m -0.3305124, 50.7265199, -26.4110500, NA, -39.41732…
+$ longitude                        [3m[38;5;246m<dbl>[39m[23m -78.60934934, -1.95883501, 152.82994167, NA, 175.3…
+$ positional_accuracy              [3m[38;5;246m<int>[39m[23m 244, 44, 165, 10988, 4, NA, 6, 15, 0, NA, NA, 10, …
+$ geoprivacy                       [3m[38;5;246m<fct>[39m[23m , , , private, , obscured, , , , obscured, obscure…
+$ taxon_geoprivacy                 [3m[38;5;246m<fct>[39m[23m , , , , , , , , , , , , , , , , , , , , , , , , , …
+$ coordinates_obscured             [3m[38;5;246m<fct>[39m[23m false, false, false, true, false, true, false, fal…
+$ positioning_method               [3m[38;5;246m<fct>[39m[23m , gps, , , , , , , , , , , , , , , , , , , , , , ,…
+$ positioning_device               [3m[38;5;246m<fct>[39m[23m , gps, , , , , , , , , , , , , , , , , , , , , , ,…
+$ species_guess                    [3m[38;5;246m<fct>[39m[23m Hippodamia convergens, Cockchafer Beetles, Poincia…
+$ scientific_name                  [3m[38;5;246m<fct>[39m[23m Hippodamia convergens, Melolontha, Agrianome spini…
+$ common_name                      [3m[38;5;246m<fct>[39m[23m Convergent Lady Beetle, Cockchafer Beetles, Poinci…
+$ iconic_taxon_name                [3m[38;5;246m<fct>[39m[23m Insecta, Insecta, Insecta, Insecta, Insecta, Insec…
+$ taxon_id                         [3m[38;5;246m<int>[39m[23m 48987, 48199, 201855, 341892, 371066, 136361, 1242…
+$ taxon_kingdom_name               [3m[38;5;246m<fct>[39m[23m Animalia, Animalia, Animalia, Animalia, Animalia, …
+$ taxon_phylum_name                [3m[38;5;246m<fct>[39m[23m Arthropoda, Arthropoda, Arthropoda, Arthropoda, Ar…
+$ taxon_class_name                 [3m[38;5;246m<fct>[39m[23m Insecta, Insecta, Insecta, Insecta, Insecta, Insec…
+$ taxon_order_name                 [3m[38;5;246m<fct>[39m[23m Coleoptera, Coleoptera, Coleoptera, Coleoptera, Co…
+$ taxon_family_name                [3m[38;5;246m<fct>[39m[23m Coccinellidae, Scarabaeidae, Cerambycidae, Scaraba…
+$ taxon_genus_name                 [3m[38;5;246m<fct>[39m[23m Hippodamia, Melolontha, Agrianome, Chondropyga, Py…
+$ taxon_species_name               [3m[38;5;246m<fct>[39m[23m Hippodamia convergens, , Agrianome spinicollis, Ch…
+$ taxon_subspecies_name            [3m[38;5;246m<fct>[39m[23m , , , , , , , , , , , , , , , , , , , , , , , , , …
+"
+"0","```r
+glimpse(usa)
+```"
+"1","Observations: 32,920
+Variables: 37
+$ id                               [3m[38;5;246m<int>[39m[23m 5942947, 19354339, 19360615, 19361033, 19363706, 1…
+$ observed_on_string               [3m[38;5;246m<fct>[39m[23m Wed Apr 17 2019 15:26:11 GMT-0600 (MDT), Tue Jan 0…
+$ observed_on                      [3m[38;5;246m<fct>[39m[23m 2019-04-17, 2019-01-01, 2019-01-01, 2019-01-01, 20…
+$ time_observed_at                 [3m[38;5;246m<fct>[39m[23m 2019-04-17 21:26:11 UTC, 2019-01-01 14:26:13 UTC, …
+$ time_zone                        [3m[38;5;246m<fct>[39m[23m Mountain Time (US & Canada), Eastern Time (US & Ca…
+$ out_of_range                     [3m[38;5;246m<fct>[39m[23m , , , , , , , , , , , , , , , , , , , , , , , , , …
+$ created_at                       [3m[38;5;246m<fct>[39m[23m 2017-04-24 21:58:54 UTC, 2019-01-01 16:26:43 UTC, …
+$ updated_at                       [3m[38;5;246m<fct>[39m[23m 2019-04-18 18:56:43 UTC, 2019-06-26 00:56:22 UTC, …
+$ quality_grade                    [3m[38;5;246m<fct>[39m[23m needs_id, needs_id, needs_id, needs_id, needs_id, …
+$ description                      [3m[38;5;246m<fct>[39m[23m \"Shiny green insect (fly). Has black body with a e…
+$ id_please                        [3m[38;5;246m<fct>[39m[23m false, false, false, false, false, false, false, f…
+$ num_identification_agreements    [3m[38;5;246m<int>[39m[23m 2, 0, 0, 0, 3, 2, 1, 0, 1, 0, 0, 0, 0, 0, 4, 3, 2,…
+$ num_identification_disagreements [3m[38;5;246m<int>[39m[23m 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+$ captive_cultivated               [3m[38;5;246m<fct>[39m[23m false, false, false, false, false, false, false, f…
+$ oauth_application_id             [3m[38;5;246m<int>[39m[23m 3, 3, 2, 3, 2, 3, 2, 3, NA, 2, 3, 2, 3, 3, 3, 2, 3…
+$ place_guess                      [3m[38;5;246m<fct>[39m[23m \"University of Texas at El Paso, El Paso, TX, US\",…
+$ latitude                         [3m[38;5;246m<dbl>[39m[23m 31.77062, 43.67979, 41.07834, 30.14305, 41.90229, …
+$ longitude                        [3m[38;5;246m<dbl>[39m[23m -106.50356, -72.31209, -73.78816, -81.75662, -72.7…
+$ positional_accuracy              [3m[38;5;246m<int>[39m[23m 65, 50, 1393, 10, NA, 26, 9, 20, 187, 33, 22, NA, …
+$ geoprivacy                       [3m[38;5;246m<fct>[39m[23m , , , , , , , , obscured, , , , , , , , , , , , , …
+$ taxon_geoprivacy                 [3m[38;5;246m<fct>[39m[23m , , , , , , , , , , , , , , , , , , , , , , , , , …
+$ coordinates_obscured             [3m[38;5;246m<fct>[39m[23m false, false, false, false, false, false, false, f…
+$ positioning_method               [3m[38;5;246m<fct>[39m[23m , , , , gps, , , , , gps, , gps, , , , , , , , , ,…
+$ positioning_device               [3m[38;5;246m<fct>[39m[23m , , , , gps, , , , , gps, , gps, , , , , , , , , ,…
+$ species_guess                    [3m[38;5;246m<fct>[39m[23m \"Blow Flies\", \"\", \"moth\", \"\", \"Coleotechnites\", \"M…
+$ scientific_name                  [3m[38;5;246m<fct>[39m[23m Calliphoridae, Insecta, Insecta, Insecta, Coleotec…
+$ common_name                      [3m[38;5;246m<fct>[39m[23m Blow Flies, Insects, Insects, Insects, , Myrmicine…
+$ iconic_taxon_name                [3m[38;5;246m<fct>[39m[23m Insecta, Insecta, Insecta, Insecta, Insecta, Insec…
+$ taxon_id                         [3m[38;5;246m<int>[39m[23m 61860, 47158, 47158, 47158, 174234, 69143, 53592, …
+$ taxon_kingdom_name               [3m[38;5;246m<fct>[39m[23m Animalia, Animalia, Animalia, Animalia, Animalia, …
+$ taxon_phylum_name                [3m[38;5;246m<fct>[39m[23m Arthropoda, Arthropoda, Arthropoda, Arthropoda, Ar…
+$ taxon_class_name                 [3m[38;5;246m<fct>[39m[23m Insecta, Insecta, Insecta, Insecta, Insecta, Insec…
+$ taxon_order_name                 [3m[38;5;246m<fct>[39m[23m Diptera, , , , Lepidoptera, Hymenoptera, Phasmida,…
+$ taxon_family_name                [3m[38;5;246m<fct>[39m[23m Calliphoridae, , , , Gelechiidae, Formicidae, Lonc…
+$ taxon_genus_name                 [3m[38;5;246m<fct>[39m[23m , , , , Coleotechnites, , Carausius, , Danaus, , ,…
+$ taxon_species_name               [3m[38;5;246m<fct>[39m[23m , , , , , , Carausius morosus, , Danaus plexippus,…
+$ taxon_subspecies_name            [3m[38;5;246m<fct>[39m[23m , , , , , , , , , , , , , , , , , , , , , , , , , …
+"

@@ -1,0 +1,139 @@
+---
+title: "Python Time"
+author: ''
+date: '2020-05-15'
+description: ''
+slug: python-time
+tags: []
+categories: []
+---
+![](static/blog/2020-05-15-python-time_files/dogcat.png)
+
+#### After taking this computational biology course, I have learned a number of ways to use both R and Python for data science. One of the most interesting things i've learned is how to make R and Python work together to manipulate list variables. I will now demonstrate how to create, sort, and combine lists in python and then manipulate the combined list in R to create a working dataset.
+
+### Before I can begin working with Python in Rstudio, I must load in the required packages as well as the data "skulls"
+```{r}
+#R
+
+#install.packages("reticulate")
+#install_miniconda()
+library(reticulate)
+use_python("/usr/local/bin/python")
+```
+
+### Creating two variables
+Creating variables for the amount of time each animal spends in the shelter and whether they are a cat or dog.
+```{python}
+#Python
+
+import numpy as np
+
+#Time in shelter for each cat (in months)
+cattime = [2, 6, 2, 8, 7, 5, 3, 4, 4]
+cattime=list(cattime)
+
+#Time in shelter for each dog (in months)
+dogtime = [3, 1, 2, 4, 2, 5, 6, 3, 4]
+dogtime=list(dogtime)
+```
+
+### Sorting the variables by time and
+Now that I've created these two variables in python lets sort them ascending by time spent (in R we would use tidyverse's arrange())
+```{python}
+#Python
+
+#Sorted ascending
+cattime.sort()
+cattime
+
+#Sorted ascending
+dogtime.sort()
+dogtime
+```
+
+###Getting summary statistics for each species
+```{python}
+#Average amount of time cats spend in the shelter
+cattime_sum = sum(cattime)
+print(cattime_sum/9)
+
+#Average amount of time cats spend in the shelter
+dogtime_sum = sum(dogtime)
+print(dogtime_sum/9)
+
+#Maximum and Minimum shelter times for cats
+maxc=max(cattime)
+minc=min(cattime)
+print(minc, maxc)
+
+#Maximum and Minimum shelter times for dogs
+maxd=max(dogtime)
+mind=min(dogtime)
+print(mind, maxd)
+```
+
+### Combining lists
+
+I now want to combine both lists of 9 cats and 9 dogs into 1 list of 18 animals
+```{python}
+#Python
+
+animaltime = cattime+dogtime
+```
+
+### Viewing list in R
+Now that the lists are combined, let's look at the whole thing in R
+```{r}
+#R
+time<- py$animaltime
+
+```
+
+### Creating a dataset from the python list in R
+I want to make a dataset from these times that has a variable determining if the animal is a cat or a dog.
+```{r}
+#R
+
+#The first 9 animals on the list are cats and the next 9 are dogs so we can make a list with 9 cats and 9 dogs and then cbind it to our time list
+
+animal<-c("cat","cat","cat","cat","cat","cat","cat","cat","cat","dog","dog","dog","dog","dog","dog","dog","dog","dog")
+
+
+shelter<-as.data.frame(cbind(animal,time))
+
+shelter$time<-as.character(shelter$time)
+shelter$time<-as.numeric(shelter$time)
+
+shelter$animal<-as.character(shelter$animal)
+
+str(shelter)
+head(shelter)
+```
+
+### Manipulating the dataset
+Now that the lists have been turned into an R dataset we can use it to learn about the differences between cats and dogs.
+
+```{r}
+#R
+library(tidyverse)
+library(dplyr)
+
+#Finding the averages, max, and mean in R now
+shelter %>% group_by(animal) %>% summarise(avg=mean(time))
+shelter %>% group_by(animal) %>% summarise(min=min(time), max=max(time))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

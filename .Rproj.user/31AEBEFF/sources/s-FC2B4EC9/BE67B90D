@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1589574787531.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "BE67B90D",
+    "lastKnownWriteTime" : 128,
+    "last_content_update" : 1589574787531,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "A96BA4C3",
+        "caption" : "shelter",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=shelter&cache_key=A96BA4C3",
+        "displayedObservations" : 18,
+        "environment" : "",
+        "expression" : "shelter",
+        "object" : "shelter",
+        "preview" : 0,
+        "totalObservations" : 18,
+        "variables" : 2
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

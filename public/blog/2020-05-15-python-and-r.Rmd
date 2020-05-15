@@ -1,0 +1,11 @@
+---
+title: Python and R
+author: 'Sloan Dickson'
+date: '2020-05-15'
+slug: python-and-r
+categories: []
+tags: []
+description: ''
+---
+
+

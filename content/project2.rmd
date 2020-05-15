@@ -1,0 +1,606 @@
+---
+title: "Project 2 - Ancient Egyptian Skulls"
+author: "Sloan Dickson (JSD2385)"
+date: '4-26-2020'
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+fig_width: 4 
+fig_height: 2.5 
+---
+
+
+```{r setup, include=FALSE}
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE,fig.align="center",warning=FALSE,message=FALSE,fig.width=8, fig.height=5, linewidth=60)
+options(tibble.width = 100,width = 100)
+library(tidyverse)
+```
+
+
+## Introduction
+
+  The dataset chosen for this project is called skulls. Skulls is a collection of measurements of ancient adult skulls found in Egypt. There are 150 skulls measured (30 from each time frame) and 5 variables. The explanatory variables include: epoch (c4000BCE, c3300BCE, c1850BCE, c200BCE, and c150CE), basibregmatic height (mm), basialiveolar length (mm), and nasal height (mm). The response variable that this project will study is maximum breath (mm). 
+  
+  This dataset is of interest because it could tell us how the size and proportions of skulls have changed over time in this area. I am particularly interested in how the epoch and other measurements effect the maximum breath of skulls (maximum breath is the width of skulls at the widest point of the cranium).
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+
+#install.packages("HSAUR")
+library(HSAUR)
+skulls<-skulls
+head(skulls)
+str(skulls)
+
+#I am going to add 2 additional variables to the dataset in order to separate the Epoch variable into the BCE and CE time periods. This will be useful for a later part of the project.
+
+skulls2<-skulls %>% mutate(timenum=ifelse(epoch=="cAD150",1,0), timechar=ifelse(epoch=="cAD150", "CE", "BCE"))
+
+#A view of the edited dataset
+
+head(skulls2)
+str(skulls2)
+```
+
+## MANOVA
+
+### Hypotheses:
+- H0: For all the numeric variables (maximum breath (mm), basibregmatic height (mm), basialiveolar length (mm), and nasal height (mm)), means for each epoch are equal.
+- HA: For all the numeric variables (maximum breath (mm), basibregmatic height (mm), basialiveolar length (mm), and nasal height (mm)), means for each epoch are not equal.
+
+### Assumptions
+```{r}
+#- We assume this is a random sample with independent observations
+# Multivariate normality of DVs (or each group )
+
+library(mvtnorm)
+library(ggExtra)
+
+ggplot(skulls, aes(x = mb, y = bh, fill=epoch)) +
+  geom_point(alpha = .5) + 
+  geom_density_2d(h=15) + 
+  coord_fixed() + 
+  facet_wrap(~epoch) +
+  ggtitle("Density Plot of Maximum Breath and Basibregmatic Height by Epoch")+
+  xlab("Maximum Breath (mm)") +ylab("Basibregmatic Height (mm)")
+
+ggplot(skulls, aes(x = mb, y = bl, fill=epoch)) +
+  geom_point(alpha = .5) + 
+  geom_density_2d(h=15) + 
+  coord_fixed() + 
+  facet_wrap(~epoch) + 
+  ggtitle("Density Plot of Maximum Breath and Basialiveolar Length by Epoch")+
+  xlab("Maximum Breath (mm)") +ylab("Basialiveolar Length (mm)")
+
+ggplot(skulls, aes(x = mb, y = nh, fill=epoch)) +
+  geom_point(alpha = .5) + 
+  geom_density_2d(h=15) + 
+  coord_fixed() + 
+  facet_wrap(~epoch) +
+  ggtitle("Density Plot of Maximum Breath and Nasal Height by Epoch")+
+  xlab("Maximum Breath (mm)") +ylab("Nasal Height (mm)")
+
+ggplot(skulls, aes(x = bh, y = bl, fill=epoch)) +
+  geom_point(alpha = .5) + 
+  geom_density_2d(h=15) + 
+  coord_fixed() + 
+  facet_wrap(~epoch) + 
+  ggtitle("Density Plot of Basibregmatic Height and Basialiveolar Length by Epoch")+
+  xlab("Basibregmatic Height (mm)") + ylab("Basialiveolar Length (mm)")
+
+ggplot(skulls, aes(x = bh, y = nh, fill=epoch)) +
+  geom_point(alpha = .5) + 
+  geom_density_2d(h=15) + 
+  coord_fixed() + 
+  facet_wrap(~epoch) +
+  ggtitle("Density Plot of Basibregmatic Height and Nasal Height by Epoch")+
+  xlab("Basibregmatic Height (mm)") +ylab("Nasal Height (mm)")
+
+ggplot(skulls, aes(x = bl, y = nh, fill=epoch)) +
+  geom_point(alpha = .5) + 
+  geom_density_2d(h=15) + 
+  coord_fixed() + 
+  facet_wrap(~epoch) + 
+  ggtitle("Density Plot of Basibregmatic Height and Basialiveolar Length by Epoch")+
+  xlab("Basialiveolar Length (mm)") +ylab("Nasal Height (mm)") 
+
+#Our dataset appears to have a very loose multivariate normality.
+
+#- Homogeneity of within-group covariance matrices
+
+covmats1<-skulls%>%group_by(epoch)%>%do(covs=cov(.[2:5]))
+for(i in 1:5){print(as.character(covmats1$epoch[i])); print(covmats1$covs[i])}
+#The covariances aren't perfect, and do not truly meet this assumption. 
+#The test will be continued despite this.
+
+
+#- No Outliers & Linear relationships among DVs
+#Outliers visual test
+ggplot(skulls, aes(x = mb, y = bh, fill=epoch)) +
+  geom_point() + 
+  ggtitle("Scatter Plot of Maximum Breath and Basibregmatic Height by Epoch")+
+  xlab("Maximum Breath (mm)") +ylab("Basibregmatic Height (mm)")
+ggplot(skulls, aes(x = mb, y = bl, fill=epoch)) +
+  geom_point() + 
+  ggtitle("Scatter Plot of Maximum Breath and Basialiveolar Length by Epoch")+
+  xlab("Maximum Breath (mm)") +ylab("Basialiveolar Length (mm)")
+ggplot(skulls, aes(x = mb, y = nh, fill=epoch)) +
+  geom_point() +
+  ggtitle("Scatter Plot of Maximum Breath and Nasal Height by Epoch")+
+  xlab("Maximum Breath (mm)") +ylab("Nasal Height (mm)")
+ggplot(skulls, aes(x = bh, y = bl, fill=epoch)) +
+  geom_point() +
+  ggtitle("Scatter Plot of Basibregmatic Height and Basialiveolar Length by Epoch")+
+  xlab("Basibregmatic Height (mm)") + ylab("Basialiveolar Length (mm)")
+ggplot(skulls, aes(x = bh, y = nh, fill=epoch)) +
+  geom_point()+
+  ggtitle("Scatter Plot of Basibregmatic Height and Nasal Height by Epoch")+
+  xlab("Basibregmatic Height (mm)") +ylab("Nasal Height (mm)")
+ggplot(skulls, aes(x = bl, y = nh, fill=epoch)) +
+  geom_point() +
+  ggtitle("Scatter Plot of Basibregmatic Height and Basialiveolar Length by Epoch")+
+  xlab("Basialiveolar Length (mm)") +ylab("Nasal Height (mm)")
+#There don't appear to be any outliers
+
+#From the graphs above, there doesn't seem to be a linear relationship between any of the variables.
+
+#Checking linear relationship
+cor_skulls <- skulls %>% select_if(is.numeric) %>% cor 
+
+library(kableExtra)
+
+cor_skulls %>% kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+
+#None of the variables share a strong linear relationship with each other. 
+#This assumption is not met.
+#This also makes it seem that the No multicollinearity assumption is met 
+#because none of the DVs are too linearly correlated.
+```
+
+For the most part, the assumptions were not met. However, the show must go on.
+
+### MANOVA
+```{r}
+man1<-manova(cbind(mb,bh,bl,nh)~epoch, data=skulls)
+summary(man1)
+
+#MANOVA test is significant with a p value of 4.675e-06
+#Univariate ANOVAs and pairwise t-tests must be conducted
+```
+
+### Univariate ANOVAs
+```{r}
+summary.aov(man1)
+skulls%>%group_by(epoch)%>%summarize(mean(mb),mean(bh), mean(bl), mean(nh))
+
+#The maximum breath, basibregmatic height, and basialiveolar length variables all show a significant mean 
+#difference in one or more of the epochs. The pairwise t-tests will give more insight on which epochs show the 
+#most difference.
+
+```
+
+### Pairwise t-tests
+```{r}
+pairwise.t.test(skulls$mb,skulls$epoch,
+                p.adj="none")
+pairwise.t.test(skulls$bh,skulls$epoch,
+                p.adj="none")
+pairwise.t.test(skulls$bl,skulls$epoch,
+                p.adj="none")
+pairwise.t.test(skulls$nh,skulls$epoch,
+                p.adj="none")
+```
+
+### Error rate & Bonferroni Correction
+```{r}
+#1 MANOVA
+#4 ANOVAs
+#20 t-tests
+1+4+20
+#25 total tests
+
+#Error rate
+1-(.95)^25
+
+#Bonferroni Correction
+.05/25
+```
+
+### Visualiation
+```{r}
+skulls %>% select(epoch,mb,bh,bl, nh) %>% 
+  pivot_longer(-1,names_to='DV', values_to='measurement') %>% 
+  ggplot(aes(epoch,measurement,fill=epoch)) + 
+  geom_bar(stat="summary") + 
+  geom_errorbar(stat="summary", width=.5) +
+  facet_wrap(~DV, nrow=2) + 
+  coord_flip() + 
+  ylab("") + 
+  theme(legend.position = "none")
+```
+
+### Conclusions Drawn from MANOVA
+  A one-way MANOVA was conducted to determine the effect of the time period (epochs: c4000BCE, c3300BCE, c1850BCE, c200BCE, and c150CE) on 4 dependent variables (maximum breath (mm), basibregmatic height (mm), basialiveolar length (mm), and nasal height (mm)) The bivariate density plots for each group do not fully follow multivariate normality. The assumption of in-group homogeneity was tested using covariance matrices and was not met. Bivariate linearity assumptions were also not met after consulting individual scatterplots and the correlation matrix. No univariate or multivariate outliers were evident. The MANOVA test was ill-advised, but continued nonetheless. 
+  
+  Significant differences were found among the epochs for at least one of the dependent variables (Pillai=0.35331, approx. f=3.512, p-value=4.675e-06), further univariate ANOVAS and pairwise t-tests were conducted to determine which of the response variables and epochs differed.
+  
+  Univariate ANOVAs were conducted, The univariate ANOVAs for maximum breath (F=5.9546, p-value=0.0001826) and basialiveolar length (F=8.3057, p-value=4.636e-06) were significant after the Bonferroni corrected level of significance (alpha=.002). From this point forward, the Bonferroni correction will be used because the type one error rate is 72.26% otherwise.
+  
+  Pairwise t-tests were performed as post-hoc analyses to determine which epochs showed differences across the response variables. The 4000BCE epoch differed significantly with 200BCE (p-value=0.00065) and AD150 (p-value= 4e-05). The 3300BCE epoch also differed significantly with the AD150 epoch for maximum breath (p-value=0.00167). The 4000BCE epoch differed significantly from the 200BCE (p-value= 0.00037) and AD150 (p-value= 1.6e-05) epochs for basialiveolar length and the 3000BCE epoch differed with these as well (p-values= 0.00048 and 2.2e-05 respectfully). 
+  
+  If the assumptions were met, this would give enough evidence to reject the null hypothesis that all the numeric variables (maximum breath (mm), basibregmatic height (mm), basialiveolar length (mm), and nasal height (mm)), means for each epoch are equal. This set of tests gives insight into which variables and epochs differ significantly. It appears that the maximum breath and basialiveolar length variables changed the most over time and that the differences are greatest between the oldest (4000BCE & 3300BCE) and youngest (200BCE & AD150) epochs.
+
+
+
+## Randomiation test (Mean Difference)
+For this section of the project, a randomization test will be conducted. Since the variables of interest are epoch (categorical) and maximum breath (numeric), a mean difference test will be used. 
+
+### Hypotheses:
+H0: Mean maximum breath is the same across all epochs
+HA: Mean maximum breath is different in one or more epochs
+
+### Visualization of original sample:
+
+```{r}
+ggplot(skulls2,aes(mb,fill=timechar))+
+  geom_histogram()+
+  facet_wrap(~timechar)+
+  theme(legend.position="none")+
+  ggtitle("Histogram of Maximum Breath by Time")+
+  xlab("Maximum Breath (mm)")
+```
+
+### Randomization Test
+
+```{r}
+#Original mean difference
+origdiff<-skulls2%>%group_by(timechar)%>%
+  summarize(means=mean(mb))%>%
+  summarize(`mean_diff:`=diff(means))
+origdiff
+
+#Random distribution
+random_dist<-vector()
+for(i in 1:5000){
+sample_<-data.frame(mb=sample(skulls2$mb),timechar=skulls2$timechar)
+random_dist[i]<-mean(sample_[sample_$timechar=="CE",]$mb)-
+mean(sample_[sample_$timechar=="BCE",]$mb)}
+
+#Visualization of the sample mean difference compared to the random distribution created above.
+{hist(random_dist,main="",ylab=""); abline(v = 2.741667,col="red")}
+##This seems like an significant difference.
+
+#Calculating the p-value for the likelihood that once could get this result by chance.
+mean(random_dist>2.741667 | random_dist< -2.741667)
+##That is a very small p-value.
+```
+
+### Conclusions drawn from Randomization test
+  After creating a random distribution for the difference in mean maximum breath of skulls from BCE and CE, an average mean difference of 2.741667 and a p-value of .0036 was calculated. This indicates that there is a significant difference in mean maximum breath of Egyptian skulls from BCE time periods and CE time periods.
+
+
+## Linear Regression Model
+
+### Hypotheses
+- H01:While controlling for basibregmatic height, basialiveolar length, and nasal height, time (BCE or CE) does not explain variation in maximum breath of Egyptian skulls.
+- H02:While controlling for time (BCE or CE), basialiveolar length, and nasal height, basibregmatic height, does not explain variation in maximum breath of Egyptian skulls.
+- H03:While controlling for time (BCE or CE), basibregmatic height, and nasal height, basialiveolar length, does not explain variation in maximum breath of Egyptian skulls.
+- H04:While controlling for time (BCE or CE), basibregmatic height, and basialiveolar length, nasal height, does not explain variation in maximum breath of Egyptian skulls.
+
+### Mean-centering numeric variables
+```{r}
+skulls2<- skulls2 %>% mutate(mb_c=skulls2$mb-mean(skulls2$mb), 
+                             bh_c=skulls2$bh-mean(skulls2$bh), 
+                             bl_c=skulls2$bl-mean(skulls2$bl),
+                             nh_c=skulls2$nh-mean(skulls2$nh))
+```
+
+
+### Assumptions
+```{r}
+#Linear Association between maximum breath and predictor variables
+
+ggplot(skulls2, aes(timenum, mb)) +
+  geom_point() + 
+  ggtitle ("Maximum Breath and Time") + 
+  xlab("Maximum Breath (mm)") +
+  ylab("Time (0=BCE, 1=CE)")
+
+ggplot(skulls2, aes(bh_c, mb)) +
+  geom_point() + 
+  ggtitle ("Maximum Breath and Mean-Centered Basibregmatic Height") + 
+  xlab("Maximum Breath (mm)") +
+  ylab("Basibregmatic Height (mm)")
+
+ggplot(skulls2, aes(bl_c, mb)) +
+  geom_point() + 
+  ggtitle ("Maximum Breath and Mean-Centered Basialiveolar Length") + 
+  xlab("Maximum Breath (mm)") +
+  ylab("Basialiveolar Length (mm)")
+
+ggplot(skulls2, aes(nh_c, mb)) +
+  geom_point() + 
+  ggtitle ("Maximum Breath and Mean-Centered Nasal Height") + 
+  xlab("Maximum Breath (mm)") +
+  ylab("Nasal Height (mm)")
+
+##Vague Linear Associations between explanatory variables and maximum breath.
+
+#Normally distributed residuals
+residuals<-lm(mb ~ timenum*bh_c*bl_c*nh_c, data=skulls2)$residuals
+ggplot() +
+  geom_histogram(aes(residuals),bins=10)
+##This plot looks very normal. This assumption has been met.
+##double checking with Shapiro-Wilk test
+shapiro.test(residuals)
+##p-value>.05, normal distribution of residuals.
+
+#Homoskedasticity
+fitted<-lm(mb ~ timenum*bh_c*bl_c*nh_c, data=skulls2)$fitted.values
+ggplot()+geom_point(aes(residuals,fitted))
+##The scatter is very even. This assumption has been met
+
+#Observations are random and independent of each other.
+
+#All assumptions have been met.
+```
+
+### Linear Regression Model 
+
+```{r}
+fit1<-lm(mb ~ timenum*bh_c*bl_c*nh_c, data=skulls2)
+summary(fit1)
+
+ggplot(skulls2, aes(x = bh_c, y = mb, color = timechar)) + stat_smooth(method = "lm") + 
+    geom_point() + xlab("Basibregmatic Height (mm)") + ylab("Maximum Breath (mm)") + 
+    ggtitle("Maximum Breaths by Basibregmatic Height and Age") + 
+    theme_classic()
+
+```
+### Percent of variation predicted by model
+4.02% of the variation in maximum breath can be explained by the variation in time, basibregmatic height, basialiveolar length, and nasal height.
+
+### Complete Model and interpretation
+
+mb = .01336 + 2.657(CE) - .04685(bh_c) -.07488(bl_c) + .4598(nh_c) + .06328(CE)(bh_c) - .05253(CE)(bl_c) +
+  .0009327(bh_c)(bl_c) -.4414(CE)(nh_c) -.01688(bh_c)(nh_c) +.03379(bl_c)(nh_c) - .01707(CE)(bh_c)(bl_c) -
+  .05284(CE)(bh_c)(nh_c) + .04661(CE)(bl_c)(nh_c) - .005065(bh_c)(bl_c)(nh_c) +.004427(CE)(bh_c)(bl_c)(nh_c)
+
+
+  This model predicts that for a skull from BCE with an average bh, bl, and nh, their maximum breath would be .01336mm. The coefficient 2.657 predicts that a skull from CE with an average bh, bl, and nh will have a 2.657mm larger maximum breath. The coefficient -.04685 predicts that a skull from BCE with an average bl and nh will have a decrease of -.04685mm in maximum breath for every 1mm increase in bh. The coefficient -.07488 predicts that a skull from BCE with an average bh and nh will have a decrease of -.07488mm in maximum breath for every 1mm increase in bl. The coefficient .4598 predicts that a skull from BCE with an average bh and bl will have a increase of .4598mm in maximum breath for every 1mm increase in nh. 
+
+  Only of the interactions are significant and are extremely complicated to list and interpret. The interactions between {time & bh}, {bh & bl}, {bl & nh}, {time, bl, & nh}, and {time, bh, bl, & nh} are all positive and indicate that an increase in one of the variables involved results in an increase in all of the variables involved. The rest of the interactions are negative and result in a decrease in all variables involved when there is an increase in one of the variables involved.
+
+### Model with Robust Standard Errors
+```{r}
+library(sandwich)
+library(lmtest)
+
+#Is the model homoskedastic?
+bptest(fit1)
+##It is, but the model will have robust standard errors anyway
+
+#Original Coefficients and SEs
+summary(fit1)$coef[,1:2]
+
+#Coefficients with robust SEs
+coeftest(fit1, vcov = vcovHC(fit1))[,1:2]
+
+#New fit
+coeftest(fit1, vcov = vcovHC(fit1))
+
+```
+### Significance
+
+   The significance of the results of this linear model have changed after substituting the SEs for more robust ones. After using robust standard errors, the time variable is no longer significant (original p-value was 0.03125 and the new p-value is 0.234645). The only remaining significant factor in the new model is the variable nasal height (mm) that has been mean centered, none of the interactions were significant. In the original model, the p-value for nh was 0.00331 and the new p-value is 0.005262 which is still significant. From this model, we would be able to reject the null that while controlling for time (BCE or CE), basibregmatic height, and basialiveolar length, nasal height, does not explain variation in maximum breath of Egyptian skulls.
+
+## Linear Regression Model with Bootstrapped Standard Errors
+```{r}
+
+samp_skull <- replicate (5000, {
+boot_dat <- sample_frac(skulls2, replace=T) 
+fit2 <- lm(mb ~ timenum*bh_c*bl_c*nh_c, data=boot_dat) 
+coef(fit2)
+})
+
+```
+### Comparisons
+```{r}
+#Original Coefficients and SEs
+summary(fit1)$coef[,1:2]
+
+#Coefficients with robust SEs
+coeftest(fit1, vcov = vcovHC(fit1))[,1:2]
+
+#Coefficients with Bootstrapped SEs
+samp_skull %>% t %>% as.data.frame %>% summarize_all(sd)
+```
+  The SEs from the robust model are larger than that of the original model and the SEs that have been bootstrapped are larger than the robust SEs. Since the standard errors are larger for the bootstrapped SE model, the p-value will be larger, and it will be more difficult to reject the null hypotheses from the original regression.
+
+## Logistic Regression
+  This model will use a logistic regression to predict age (BCE or CE) from the mean-centered measurements of maximum breath (mm), basibregmatic height (mm), basialiveolar length (mm), and nasal height (mm).
+
+###Hypotheses: 
+- The hypotheses are the same as the ones for the linear regression
+
+### Assumptions
+- The observations are random and independent of each other. True
+- The independent variables are each linearly related to the log-odds. True
+- There are at lease 10 cases for each outcome. True
+
+### Logistic Model
+```{r}
+skulls2$timechar <- factor(skulls2$timechar)
+
+logfit <- glm(timechar~mb_c+bh_c+bl_c+nh_c,data=skulls2,family=binomial(link="logit"))
+summary(logfit)
+coeftest(logfit)
+exp(coef(logfit))
+```
+
+### Interpretation of Coefficients
+- The odds of age (BCE or CE) for skulls with an average mb, bh, bl, and nh is 0.1907.
+- Controlling for bh, bl, and nh, for every 1 mm increase in maximum breath, the odds of
+age being CE increase by a factor of 1.1075 (This is significant with p-value=0.0352).
+- Controlling for mb, bl, and nh, for every 1 mm increase in basibregmatic height, the odds of
+age being CE increase by a factor of 0.9208 (This is not significant with p-value=0.0756).
+- Controlling for mb, bh, and nh, for every 1 mm increase in basialiveolar length, the odds of
+age being CE increase by a factor of 0.8957 (This is significant with p-value=0.0183).
+- Controlling for mb, bh, and bl, for every 1 mm increase in nasal height, the odds of
+age being CE increase by a factor of 1.0549 (This is not significant with p-value=0.4343).
+
+### Confisuion Matrix
+```{r}
+probs<-predict(logfit,type="response")
+table(predict=as.numeric(probs>.5),truth=skulls2$timechar)%>%addmargins
+
+#Sensitivity (TPR)
+6/30
+#The true positive rate or sensitivity for this model is 20%.
+#Which means that the model accuratly predicts CE 20% of the time
+
+#Specificity (TNR)
+117/120
+#The true negative rate or sensitivity for this model is 97.5%.
+#Which means that the model accuratly predicts BCE 97.5% of the time
+
+#Precision
+6/9
+#The positive rate or precision for this model is 66.66%.
+#Which means that the model CE 66.66% of the time.
+
+#Accuracy
+(117+6)/150
+#The accuracy rate of this model is 82%. 
+#Which means that it is accurate 82% of the time.
+
+```
+
+### Density Plot of log-odds by Age (timchar) variable
+```{r}
+skulls2$logit<-predict(logfit,type="link") 
+
+skulls2%>%ggplot()+
+  geom_density(aes(logit,color=timechar,fill=timechar), alpha=.4)+
+  theme(legend.position=c(.85,.85)) +
+  geom_vline(xintercept=0)+
+  xlab("predictor (logit)")
+```
+
+### ROC Curve
+```{r}
+#Creating prob and truth variables in new dataset
+skulls2<-skulls2%>%mutate(prob=predict(logfit, type="response"), predict=ifelse(prob>.5,1,0))
+class<-skulls2%>%transmute(prob,predict,truth=skulls2$timechar)
+class
+
+#Confusion matrix
+table(predict=class$predict,truth=class$truth)%>%addmargins()
+
+library(plotROC)
+ROC1<-ggplot(class)+geom_roc(aes(d=class$truth,m=class$prob), n.cuts=0)
+ROC1
+
+calc_auc(ROC1)
+```
+This ROC curve has a fair AUC of .7547222 which suggests that 75.47% of the data is explained by the model. The ROC curve helps show the AUC and how much of the data, that the model does not explain (area above the curve). 
+
+
+### 10-fold CV
+```{r}
+class_diag<-function(probs,truth){
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  prediction<-ifelse(probs>.5,1,0)
+  acc=mean(truth==prediction)
+  sens=mean(prediction[truth==1]==1)
+  spec=mean(prediction[truth==0]==0)
+  ppv=mean(truth[prediction==1]==1)
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  TPR=cumsum(truth)/max(1,sum(truth))
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+  data.frame(acc,sens,spec,ppv,auc)
+}
+
+set.seed(1234)
+k=10 
+
+data<-skulls2[sample(nrow(skulls2)),] 
+folds<-cut(seq(1:nrow(skulls2)),breaks=k,labels=F) 
+diags<-NULL
+for(i in 1:k){
+  train<-data[folds!=i,]
+  test<-data[folds==i,]
+  truth<-test$timechar
+  fit<-glm(timechar~mb_c+bh_c+bl_c+nh_c,data=train,family="binomial")
+  probs<-predict(fit,newdata = test,type="response")
+  diags<-rbind(diags,class_diag(probs,truth))
+}
+summarize_all(diags,mean)
+```
+  The logistic regression performed decently well with the sample data and had a fair AUC of 0.7547222. This is a start difference from the 10-fold CV using the model which had a poor AUC of 0.656864. This suggests that the model is overfitted to the original sample and is less useful for different samples/real world populations. This could be helped using the lasso regression method.
+
+## Lasso Regression 10-CV
+
+### Lasso
+```{r}
+library(glmnet)
+y <- as.matrix(skulls2$timechar)
+x <- model.matrix(timechar~mb_c+bh_c+bl_c+nh_c, data=skulls2)
+cv<-cv.glmnet(x,y,family='binomial')
+lasso1<-glmnet(x,y, family="binomial",lambda=cv$lambda.1se)
+coef(lasso1)
+
+lasso2<-glmnet(x,y, family="binomial",lambda=cv$lambda.min)
+coef(lasso2)
+```
+  A lasso regression was calculated to show which variables (mb, bh, bl, and nh) are significant in predicting the age of a skull (BCE or CE). This is what was used for the logistic regression model so the fit of the model can be compared as the logistic model from the previous section had overfitting. Originally, lambda.1se was used in the lasso, but this led to none of the variables being predictor variables. After that, lamba.min was used and now maximum breath, basibregmatic height, and basialiveolar length are the only variables viable for this model.
+  
+### 10-fold using lasso model
+```{r}
+set.seed(1234)
+k=10
+
+data1<-skulls2[sample(nrow(skulls2)),] 
+folds<-cut(seq(1:nrow(skulls2)),breaks=k,labels=F) 
+diags2<-NULL
+for(i in 1:k){
+  train<-data1[folds!=i,]
+  test<-data1[folds==i,]
+  truth<-test$timechar
+  fit3<-glm(timechar~mb_c+bh_c+bl_c,data=train,family="binomial")
+  probs<-predict(fit3,newdata = test,type="response")
+  diags2<-rbind(diags,class_diag(probs,truth))
+}
+
+diags2%>%summarize_all(mean)
+```
+
+  When comparing this 10-fold lasso model to the original logistic model and the 10-fold CV for it, it is quite shocking that the AUC has decreased with the more limited model scope. This could be due to the initial lasso (lambda.1se). The first lasso showed that none of the predictor variables were suitable to predict age (timechar), so an additional lasso (lambda.min) was used. Though the original model was overfitted to the training sample, it has a better fit, than this lasso model and does a better of predicting age (BCE or CE) of Egyptian skulls using all 4 variables than the lasso model does with only maximum breath, basibregmatic height, and basialiveolar length.
+
+
+
+
+

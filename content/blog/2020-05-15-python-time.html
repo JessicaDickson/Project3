@@ -1,0 +1,149 @@
+---
+title: "Python Time"
+author: ''
+date: '2020-05-15'
+description: ''
+slug: python-time
+tags: []
+categories: []
+---
+
+
+
+<p><img src="static/blog/2020-05-15-python-time_files/dogcat.png" /></p>
+<div id="after-taking-this-computational-biology-course-i-have-learned-a-number-of-ways-to-use-both-r-and-python-for-data-science.-one-of-the-most-interesting-things-ive-learned-is-how-to-make-r-and-python-work-together-to-manipulate-list-variables.-i-will-now-demonstrate-how-to-create-sort-and-combine-lists-in-python-and-then-manipulate-the-combined-list-in-r-to-create-a-working-dataset." class="section level4">
+<h4>After taking this computational biology course, I have learned a number of ways to use both R and Python for data science. One of the most interesting things i’ve learned is how to make R and Python work together to manipulate list variables. I will now demonstrate how to create, sort, and combine lists in python and then manipulate the combined list in R to create a working dataset.</h4>
+</div>
+<div id="before-i-can-begin-working-with-python-in-rstudio-i-must-load-in-the-required-packages-as-well-as-the-data-skulls" class="section level3">
+<h3>Before I can begin working with Python in Rstudio, I must load in the required packages as well as the data “skulls”</h3>
+<pre class="r"><code>#R
+
+#install.packages(&quot;reticulate&quot;)
+#install_miniconda()
+library(reticulate)
+use_python(&quot;/usr/local/bin/python&quot;)</code></pre>
+</div>
+<div id="creating-two-variables" class="section level3">
+<h3>Creating two variables</h3>
+<p>Creating variables for the amount of time each animal spends in the shelter and whether they are a cat or dog.</p>
+<pre class="python"><code>#Python
+
+import numpy as np
+
+#Time in shelter for each cat (in months)
+cattime = [2, 6, 2, 8, 7, 5, 3, 4, 4]
+cattime=list(cattime)
+
+#Time in shelter for each dog (in months)
+dogtime = [3, 1, 2, 4, 2, 5, 6, 3, 4]
+dogtime=list(dogtime)</code></pre>
+</div>
+<div id="sorting-the-variables-by-time-and" class="section level3">
+<h3>Sorting the variables by time and</h3>
+<p>Now that I’ve created these two variables in python lets sort them ascending by time spent (in R we would use tidyverse’s arrange())</p>
+<pre class="python"><code>#Python
+
+#Sorted ascending
+cattime.sort()
+cattime
+
+#Sorted ascending</code></pre>
+<pre><code>## [2, 2, 3, 4, 4, 5, 6, 7, 8]</code></pre>
+<pre class="python"><code>dogtime.sort()
+dogtime</code></pre>
+<pre><code>## [1, 2, 2, 3, 3, 4, 4, 5, 6]</code></pre>
+<p>###Getting summary statistics for each species</p>
+<pre class="python"><code>#Average amount of time cats spend in the shelter
+cattime_sum = sum(cattime)
+print(cattime_sum/9)
+
+#Average amount of time cats spend in the shelter</code></pre>
+<pre><code>## 4</code></pre>
+<pre class="python"><code>dogtime_sum = sum(dogtime)
+print(dogtime_sum/9)
+
+#Maximum and Minimum shelter times for cats</code></pre>
+<pre><code>## 3</code></pre>
+<pre class="python"><code>maxc=max(cattime)
+minc=min(cattime)
+print(minc, maxc)
+
+#Maximum and Minimum shelter times for dogs</code></pre>
+<pre><code>## (2, 8)</code></pre>
+<pre class="python"><code>maxd=max(dogtime)
+mind=min(dogtime)
+print(mind, maxd)</code></pre>
+<pre><code>## (1, 6)</code></pre>
+</div>
+<div id="combining-lists" class="section level3">
+<h3>Combining lists</h3>
+<p>I now want to combine both lists of 9 cats and 9 dogs into 1 list of 18 animals</p>
+<pre class="python"><code>#Python
+
+animaltime = cattime+dogtime</code></pre>
+</div>
+<div id="viewing-list-in-r" class="section level3">
+<h3>Viewing list in R</h3>
+<p>Now that the lists are combined, let’s look at the whole thing in R</p>
+<pre class="r"><code>#R
+time&lt;- py$animaltime</code></pre>
+</div>
+<div id="creating-a-dataset-from-the-python-list-in-r" class="section level3">
+<h3>Creating a dataset from the python list in R</h3>
+<p>I want to make a dataset from these times that has a variable determining if the animal is a cat or a dog.</p>
+<pre class="r"><code>#R
+
+#The first 9 animals on the list are cats and the next 9 are dogs so we can make a list with 9 cats and 9 dogs and then cbind it to our time list
+
+animal&lt;-c(&quot;cat&quot;,&quot;cat&quot;,&quot;cat&quot;,&quot;cat&quot;,&quot;cat&quot;,&quot;cat&quot;,&quot;cat&quot;,&quot;cat&quot;,&quot;cat&quot;,&quot;dog&quot;,&quot;dog&quot;,&quot;dog&quot;,&quot;dog&quot;,&quot;dog&quot;,&quot;dog&quot;,&quot;dog&quot;,&quot;dog&quot;,&quot;dog&quot;)
+
+
+shelter&lt;-as.data.frame(cbind(animal,time))
+
+shelter$time&lt;-as.character(shelter$time)
+shelter$time&lt;-as.numeric(shelter$time)
+
+shelter$animal&lt;-as.character(shelter$animal)
+
+str(shelter)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    18 obs. of  2 variables:
+##  $ animal: chr  &quot;cat&quot; &quot;cat&quot; &quot;cat&quot; &quot;cat&quot; ...
+##  $ time  : num  2 2 3 4 4 5 6 7 8 1 ...</code></pre>
+<pre class="r"><code>head(shelter)</code></pre>
+<pre><code>##   animal time
+## 1    cat    2
+## 2    cat    2
+## 3    cat    3
+## 4    cat    4
+## 5    cat    4
+## 6    cat    5</code></pre>
+</div>
+<div id="manipulating-the-dataset" class="section level3">
+<h3>Manipulating the dataset</h3>
+<p>Now that the lists have been turned into an R dataset we can use it to learn about the differences between cats and dogs.</p>
+<pre class="r"><code>#R
+library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages ─────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>## ✓ ggplot2 3.3.0     ✓ purrr   0.3.3
+## ✓ tibble  2.1.3     ✓ dplyr   0.8.5
+## ✓ tidyr   1.0.2     ✓ stringr 1.4.0
+## ✓ readr   1.3.1     ✓ forcats 0.5.0</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────── tidyverse_conflicts() ──
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(dplyr)
+
+#Finding the averages, max, and mean in R now
+shelter %&gt;% group_by(animal) %&gt;% summarise(avg=mean(time))</code></pre>
+<pre><code>## # A tibble: 2 x 2
+##   animal   avg
+##   &lt;chr&gt;  &lt;dbl&gt;
+## 1 cat     4.56
+## 2 dog     3.33</code></pre>
+<pre class="r"><code>shelter %&gt;% group_by(animal) %&gt;% summarise(min=min(time), max=max(time))</code></pre>
+<pre><code>## # A tibble: 2 x 3
+##   animal   min   max
+##   &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt;
+## 1 cat        2     8
+## 2 dog        1     6</code></pre>
+</div>

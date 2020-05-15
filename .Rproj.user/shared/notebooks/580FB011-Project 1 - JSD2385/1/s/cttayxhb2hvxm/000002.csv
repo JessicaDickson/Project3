@@ -1,0 +1,8 @@
+"0","```r
+beetles2 %>% pivot_longer(contains(\" \")) %>% 
+  separate(taxon_species_name,into=c(\"Genus\",\"Species\"))
+
+```"
+"1","Error: `cols` must select at least one column.
+[90mRun `rlang::last_error()` to see where the error occurred.[39m
+"

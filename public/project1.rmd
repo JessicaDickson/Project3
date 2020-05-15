@@ -1,0 +1,548 @@
+---
+title: "Project 1 by Sloan Dickson (JSD2385)"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+# Bug Bois (Project 1): Sloan Dickson (JSD2385)
+
+## Introduciton
+
+  These datasets are from the iNaturalist website which collects wildlife data. The website collects this data from members who identify wildlife in their daily lives and submit the location, species identification, specimen descriptions, and photographs/audio recordings as well as a number of other variables. The iNaturalist community then looks at these submissions and tries to correctly identify the species and give more detail on its taxonomy and whether it belongs in that location or is invasive.
+ 	The datasets I drew from this website are recordings of beetle sightings from the world (without USA data) in the first 6 months of 2019 (if I collected anymore data I would not have been able to export it due to size) and all insect sightings in the USA from all of 2019. They contain 38 and 37 variables respectfully, which are listed below using the names function (ID, time observed, quality_grade, etc.) The variables this project focuses on are the taxonomic variables, the time zone (which I will use, the accuracy of the and the number of agreements and disagreements observed. 
+ 	This dataset drew my attention because I have always liked to learn about entomology and this dataset both provides interesting observations of insects from around the world and shows what places in the world are most interested in entomology. 
+ 	I will be joining these datasets to only see beetle observations (USA and worldwide) and will be assessing the data for the following questions:
+-	*Which families or species have the most discussion/disagreements on identification overall? *
+-	*Does taxon predict discussion? *
+-	*Are there differences in the amount of discussion in different parts of the world (North America and Central America vs other parts of the world)?*
+-	*Are there different amounts of agreements/disagreements depending on the accuracy of the location data (higher values for positional accuracy are less accurate as it measures)? Are people more or less likely to consider species guesses valid depending on this variable?*
+  
+  *(A side note: After beginning working with this dataset, I realized that a large number of my numeric variables were essentially useless without individually editing their observations to make them useful. For example, the location information was all clumped together at the discretion of the person inputting the observation. This means that each observation was formatted differently (some added city, state, and even the street they were on while others just listed their country). This format makes it almost impossible to use as a grouping method, so I had to adapt the time_zone variable to give an estimate for location. Because a number of the numeric variables were formatted so irregularly, I had to resort to numeric variables I previously never considered such as positional_accuracy.)*
+
+ 
+Let's load in the datasets.
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(GGally)
+library(kableExtra)
+library(plotly)
+library(cluster)
+
+world_beetles <- read.csv("beetles_2019.csv")
+usa_insects <- read.csv("usa_insects.csv")
+
+#These datasets are both quite large in number of observations and in the number of variables and will likely need to be edited to be more manageable.
+```
+
+### This dataset contains 8462 observations from 2019/01/01 to 2019/06/31
+```{r}
+glimpse(world_beetles)
+```
+
+### There are 38 variables as seen  below
+```{r}
+names(world_beetles)
+```
+
+### This dataset contains 8462 observations from 2019/01/01 to 2019/12/31
+```{r}
+glimpse(usa_insects)
+```
+
+### There are 37 Variables as seen below.
+```{r}
+names(usa_insects)
+```
+
+## Tidying the Datasets
+
+  To tidy this dataset, I will remove unnecessary variables who will just clutter the data (such as "username" and "observed_on_string") these pieces of data are not the interest or are not useful. I am not going to use the time or date variables as the way they are input by users is inconsistent (ie: day, month year vs moth day year). I also will remove all the rows with NAs .
+Next I will create a coordinates variable which combines latitude and longitude while separating the variable "taxon_species _name" into “Genus” and “Species” so I can work with these variables more easily. 
+  As my datasets are already neat in the sense that they have one row per observation, I will not be able to use pivot longer or pivot wider in the raw data.
+
+
+### To tidy I will be removing non-essential variables from each dataset
+```{r}
+beetles2 <- world_beetles %>% select(id, time_zone, observed_on, description,quality_grade, num_identification_agreements, num_identification_disagreements, captive_cultivated, place_guess, latitude, longitude, positional_accuracy, species_guess, scientific_name, common_name, taxon_order_name, taxon_family_name, taxon_species_name)
+usa2 <- usa_insects %>% select(id, time_zone, observed_on, description,quality_grade, num_identification_agreements, num_identification_disagreements, captive_cultivated, place_guess, latitude, longitude, positional_accuracy, species_guess, scientific_name, common_name, taxon_order_name, taxon_family_name, taxon_species_name)
+```
+
+### I am going to remove all rows with NAs from each datset to make them easier to work with
+```{r}
+beetles3 <- beetles2 %>% filter(complete.cases(beetles2))
+usa3 <- usa2 %>% filter(complete.cases(usa2))
+
+(beetles2 %>% count())-(beetles3 %>% count())
+#2257 observations were lost when nas were removed from the beetles dataset
+(usa2 %>% count())-(usa3 %>% count())
+#10852 observations were lost when nas were removed from the beetles dataset
+```
+
+### Next I will combine the longitude and latitude columns and separate the genus and species into 2 columns
+```{r}
+beetles4 <- beetles3 %>% 
+  unite(latitude, longitude, col="coordinates",sep=",") %>% 
+  separate("taxon_species_name",into=c("Genus","Species"))
+usa4 <- usa3 %>% 
+  unite(latitude, longitude, col="coordinates",sep=",") %>% 
+  separate("taxon_species_name",into=c("Genus","Species"))
+```
+
+### The data is now tidy enough to join
+```{r}
+glimpse(beetles4)
+glimpse(usa4)
+```
+
+## Joining the Datasets
+  To join these datasets, a left join will be conducted with world_beetles as the base. This means the dataset will lose observations from the usa_insects that are not beetles. This does not give us the full picture of the insect observations for the United States, but it does allow the project to focus on only the beetles. The observations lost might include more information about identification disputes and positional accuracy trends for iNaturalist users within the United States, but this allows a closer look into those variables and there association to beetle sightings alone. 
+
+
+### How many Observations were in the original datasets?
+```{r}
+count(beetles4)+count(usa4)
+```
+*28273 observations total.*
+
+
+###Left join
+```{r}
+totalbeetlebois <- beetles4 %>% left_join(usa4)
+```
+
+```{r}
+(count(beetles4)+count(usa4))-count(totalbeetlebois)
+```
+*22068 observations were lost in the process.*
+
+```{r}
+count(totalbeetlebois)
+```
+*6205 observations remain.*
+
+## Wrangling
+
+### I will first filter out all abservations with no identification comparisons for the insects
+```{r}
+names(totalbeetlebois)
+```
+
+### I want a nonzero number of identifications in both the agreements and disagreements categories
+```{r}
+test1<-totalbeetlebois %>% filter(num_identification_agreements > 0)
+test2<-totalbeetlebois %>% filter(num_identification_disagreements > 0)
+```
+
+### Now I will join both of my tests into a new dataset
+```{r}
+idbugs <- test1 %>% full_join(test2)
+```
+*Now the only observations remaining are those who have been graded.*
+
+###Now I will create a numeric variable from time zone which categorizes whether the obsevation is the North/Central America or not (0=NA/CA, 1=Not NA/CA)
+```{r}
+idbugs <- idbugs %>% 
+  mutate(timezone=case_when(time_zone %in% 
+                              c("Eastern Time (US & Canada)","Central Time (US & Canada)", "Hawaii",	
+                                "Pacific Time (US & Canada)","Mountain Time (US & Canada)", "Arizona", 
+                                "Alaska", "America/Los_Angeles", "America/New_York") ~ 0, 
+                            time_zone %in% c("Quito", "Brisbane", "Nuku'alofaAsia/Magadan", "Wellington", 
+                                             "Australia/Perth", "Mid-Atlantic", "Europe/London","Jerusalem", 
+                                             "Amsterdam","Africa/Johannesburg", "Chennai", "UTC", "Osaka", 
+                                             "Paris", "Sydney", "Santiago", "Bangkok", "Samoa", "Baghdad", 
+                                             "West Central Africa", "Pretoria", "Singapore", "Athens", 
+                                             "Ekaterinburg", "Hong Kong", "Almaty", "Vienna", 
+                                             "Central America", "Buenos Aires", "London", "Lima", "Brasilia", 
+                                             "Jakarta", "Bogota", "Kuala Lumpur","Auckland", "Perth", 
+                                             "Casablanca", "Adelaide", "Mexico City", "Melbourne", "Rome", 
+                                             "Kyiv", "Stockholm", "Nairobi", "Taipei", "Berlin", "Madrid", 
+                                             "Atlantic Time (Canada)", "Beijing", "Prague", "Tijuana", 
+                                             "Edinburgh", "Montevideo", "Copenhagen", "Lisbon", "Abu Dhabi", 
+                                             "Bern", "Belgrade", "Monterrey", "Mazatlan", "La Paz", "Brussels",
+                                             "Guadalajara", "Istanbul", "Hobart", "Pacific/Majuro", "Moscow", 
+                                             "Yerevan", "Vilnius", "New Delhi", "Tokyo", "Zagreb", "Sofia", 
+                                             "Seoul", "Ljubljana", "Sri Jayawardenepura", "Warsaw", 
+                                             "Bucharest", "Bratislava", "Chihuahua", 
+                                             "Atlantic/Cape_Verde" ,"Islamabad", "American Samoa", 
+                                             "Cairo") ~ 1)) %>% na.omit() %>% glimpse()
+```
+
+### What is the ratio of agreements to disagreements in identification for each observation?
+*Creating a new variable called "acuracy_ratio"*
+```{r}
+idbugs <- idbugs %>% mutate(num_identification_agreements1=(num_identification_agreements+1)) %>% mutate(num_identification_disagreements1=(num_identification_disagreements+1))%>% mutate(accuracy_ratio = num_identification_agreements1/num_identification_disagreements1)
+```
+
+### What is the observation with the highest number of disagreements in identification?
+```{r}
+idbugs %>% select(id, Genus, Species, num_identification_disagreements) %>% arrange(desc(num_identification_disagreements))
+```
+*Observation 20357446 - Thelyphassa lineata*
+
+### Now to make it easier to tidy later, I am adjusting the names.
+```{r}
+idbugs <- rename(idbugs, agreements=num_identification_agreements)
+idbugs <- rename(idbugs, disagreements=num_identification_disagreements)
+idbugs <- rename(idbugs, positionalaccuracy=positional_accuracy)
+idbugs <- rename(idbugs, accuracyratio=accuracy_ratio)
+```
+
+### How many distinct outcomes are there of each variable?
+```{r}
+idbugs %>% summarize_all(n_distinct)
+```
+
+### Now I will create summary statistics of each numeric variable
+```{r}
+idbugs %>% names()
+
+idbugs %>% select(-id) %>% select(-num_identification_agreements1) %>% select(-num_identification_disagreements1) %>% summarize_if(is.numeric, mean, na.rm=T)
+idbugs %>% select(-id) %>% select(-num_identification_agreements1) %>% select(-num_identification_disagreements1) %>% summarize_if(is.numeric, sd, na.rm=T)
+idbugs %>% select(-id) %>% select(-num_identification_agreements1) %>% select(-num_identification_disagreements1) %>% summarize_if(is.numeric, funs(n = n()))
+idbugs %>% select(-id) %>% select(-num_identification_agreements1) %>% select(-num_identification_disagreements1) %>% summarize_if(is.numeric, n_distinct)
+idbugs %>% summarize_if(is.numeric, list(Q3=quantile), probs=.75, na.rm=T)
+idbugs %>% summarize_if(is.numeric, list(Q1=quantile), probs=.25, na.rm=T)
+idbugs %>% summarize_all(n_distinct)
+```
+
+#### Summary of the dataset
+  After calculating the summary statistics for each variable a few notes can be made. The first is that the average number of agreements in identification is higher than that of the disagreements (1.747654 and	0.01470961 respectfully). In addition, the id agreements has a greater standard deviation of 0.9171565	compared to the disagreements' 0.1224919. This difference in variance is also reflected in the IQR. The variable positional accuracy has a rather high mean of 4469.378 with a high standard deviation of 87717.01.
+  
+  
+### Correlation matrix among numeric variables
+```{r}
+cor_idbugs <- idbugs %>% select_if(is.numeric) %>% select(-num_identification_agreements1,-num_identification_disagreements1, -id) %>% na.omit %>% cor
+library(kableExtra)
+cor_idbugs %>% kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+#### Summary of Correlations
+  The correlations amongst all of the numeric variables are rather low. The highest correlation between variables is between the id accuracy ratio and the id agreements. This is due to the fact that they are inherently related as the accuracy ratio is made up of the combined agreements and disagreements. The other variables have correlations of lower magnitude than .2 which suggests that there is not a relationship.
+
+
+## Now I will create summary statistics of each variable by the Genus and Species of the beetles.
+
+I want to answer the questions:
+*Are some species more likely to have disagreements in their identification?
+*Are some species more likely to have issues with higher accuracy?
+*Which Species had the highest number of observations?
+
+### Creating Summary stats Individually
+```{r}
+genusspecies_means <- idbugs %>% 
+  group_by(Genus, Species) %>%
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>%
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, mean, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+
+genusspecies_sd <- idbugs %>% 
+  group_by(Genus, Species) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, sd, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+
+genusspecies.n <- idbugs %>% 
+  group_by(Genus, Species) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, funs(n = n())) %>% 
+  mutate_if(is.numeric, round)
+
+genusspecies.distinct <- idbugs %>% 
+  group_by(Genus, Species) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, funs(n = n())) %>% 
+  mutate_if(is.numeric, n_distinct)
+
+genusspecies.Q3 <- idbugs %>% 
+  group_by(Genus, Species) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, list(Q3=quantile), probs=.75, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+
+genusspecies.Q1 <- idbugs %>% 
+  group_by(Genus, Species) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, list(Q1=quantile), probs=.25, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+```
+
+### Combining all of these summary stats
+```{r}
+genspec_m_sd <- left_join(genusspecies_means, genusspecies_sd, by=c("Species","Genus"), suffix=c(".mean",".sd"))
+genspec_n_dist <- left_join(genusspecies.n, genusspecies.distinct, by=c("Species","Genus"), suffix=c(".n",".distinct"))
+genspec_Q1_Q3 <- left_join(genusspecies.Q1, genusspecies.Q3, by=c("Species","Genus"), suffix=c(".Q1",".Q3"))
+
+genusspecies_summary <- genspec_m_sd %>% full_join(genspec_n_dist) %>% full_join(genspec_Q1_Q3)
+```
+
+### Removing the N/A rows and columns from genusspecies_summary
+```{r}
+genusspecies_summary <- genusspecies_summary %>% arrange(Species)
+genusspecies_summary <- genusspecies_summary %>% arrange(Species) %>% slice(4:1800)
+genusspecies_summary <- genusspecies_summary %>% na.omit()
+
+genusspecies_summary <- genusspecies_summary %>% na.omit() 
+
+glimpse(genusspecies_summary)
+```
+
+### This is the completed summary dataset
+```{r}
+glimpse(genusspecies_summary)
+genusspecies_summary %>% slice(1:10) %>% kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+### This summary dataset needs tidying to be easy to read
+```{r}
+
+tidy_gs_summary1 <- genusspecies_summary %>%
+  pivot_longer(cols=c('agreements.mean':'accuracyratio_Q3')) %>%
+  separate(name,into=c("Variable","Statistic")) 
+tidy_gs_summary1 %>% head()
+tidy_gs_summary2 <- tidy_gs_summary1%>% pivot_wider(names_from="Statistic",values_from="value")
+tidy_gs_summary2 %>%  slice(1:10) %>% kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+
+```
+Now that's a pretty dataset!
+
+#### Summary of the dataset grouped by Species
+
+  After looking at the summary statistics for the data, one can see that there is a higher variation in agreements by species than disagreements. For instance, the highest mean agreements is 4 and the lowest is mean agreements is 0. In disagreements Cicindela	formosa	has the highest number mean of disagreements	of 0 with a standard deviation of	1 (this is interesting as it also has the lowest number for positional accuracy meaning that it has a more accurate location). Positional accuracy tells a different story. There is a large amount of variation within each species and this can be seen in Lytta	stygica's standard deviation of	27377 or Lytta	sayi's IQR of 4592. These two species are not outliers in this regard as many other species have standard deviations of over 1000. 
+
+
+### Now I will create summary statistics of each variable by the location (by time zone) of the beetles. 
+
+### I will first make the timezone variable a character.
+```{r}
+idbugs2 <- idbugs %>% mutate(timezone2=recode_factor(timezone,"0"="North and Central America", "1"="Other Continents"))
+```
+
+## Creating Summary stats individually by timezone.
+```{r}
+
+timezone_means <- idbugs2 %>% 
+  group_by(timezone2) %>%
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>%
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, mean, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+
+timezone_sd <- idbugs2 %>% 
+  group_by(timezone2) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, sd, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+
+timezone.n <- idbugs2 %>% 
+  group_by(timezone2) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, funs(n = n())) %>% 
+  mutate_if(is.numeric, round)
+
+timezone.distinct <- idbugs2 %>% 
+  group_by(timezone2) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, n_distinct) %>% 
+  mutate_if(is.numeric, round)
+
+timezone.Q3 <- idbugs2 %>% 
+  group_by(timezone2) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, list(Q3=quantile), probs=.75, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+
+timezone.Q1 <- idbugs2 %>% 
+  group_by(timezone2) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, list(Q1=quantile), probs=.25, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+```
+
+### Combining all of these summary stats
+```{r}
+timezone_m_sd <- left_join(timezone_means, timezone_sd, by="timezone2", suffix=c(".mean",".sd"))
+timezone_n_dist <- left_join(timezone.n, timezone.distinct, by="timezone2", suffix=c(".n",".distinct"))
+timezone_Q1_Q3 <- left_join(timezone.Q1, timezone.Q3, by="timezone2", suffix=c(".Q1",".Q3"))
+
+timezone_summary <- timezone_m_sd %>% full_join(timezone_n_dist) %>% full_join(timezone_Q1_Q3)
+```
+
+### Removing the N/A rows and columns from genusspecies_summary
+```{r}
+glimpse(timezone_summary)
+timezone_summary <- timezone_summary %>% na.omit()
+
+timezone_summary <- timezone_summary %>% select(-agreements, -disagreements, -positionalaccuracy,  -accuracyratio ) %>% na.omit() 
+
+glimpse(timezone_summary)
+```
+
+### This is the completed summary dataset
+```{r}
+glimpse(timezone_summary)
+timezone_summary %>% slice(1:10) %>% kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+### This summary dataset needs tidying to be easy to read
+```{r}
+tidy_timezone_summary <- timezone_summary %>%
+  pivot_longer(cols=c('agreements.mean':'accuracyratio_Q3')) %>%
+  separate(name,into=c("Variable","Statistic")) %>%
+  pivot_wider(names_from="Statistic",values_from="value") %>%
+  select(-"NA")
+
+tidy_timezone_summary %>% slice(1:10) %>% kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+Now that's a pretty dataset!
+
+#### Summary of the dataset when grouped by Timezone
+  
+  After looking at the summary statistics for the data separated by timezone, one can see that the largest difference in the datasets are the number of observations (N/CA: n=2083, OC: n=1860). There is no difference in the agreements, disagreements and identification accuracy ratio between the two groups. There is a slight difference in the positional accuracy between timezone categories. It appears that there is a lower mean for positional accuracy in other continents (lower numbers mean greater accuracy) as well as a lower variability (N/CA: sd=90777, OC: sd=84182), this is not reflected in the IQR which means there is likely a skew in positional accuracy for other continents (N/CA: IQR=94, OC: IQR=132)
+
+## Visualizations
+
+### Correlation Heatmap
+```{r}
+complete_cor_bugs <- cor_idbugs %>% as.data.frame %>%
+rownames_to_column %>%
+pivot_longer(-1,names_to="name",values_to="correlation")
+
+complete_cor_bugs %>%
+  ggplot(aes(rowname,name,fill=correlation)) +
+  geom_tile() +
+  scale_fill_gradient2(low="red",mid="purple",high="blue") +
+  geom_text(aes(label=round(correlation,2)),color = "black", size = 4) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  coord_fixed() +ggtitle("Correlation Heatmap") + ylab("Numeric Variables") + xlab("Numeric Variables")
+
+```
+  
+  After creating the correlation heatmap comparing my numeric variables (these include: id agreements, id disagreements, overall accuracy of identification, positional accuracy, and time zone/location estimate), it appears there is no strong correlation between any of the variables. My initial questions of relation between id accuracy ratio and location (timezone) and the relationship between disagreements and positional accuracy could be answered with this data in that there is little to no relationship between these variables.
+
+
+### Number of Disagreements by Positional Accuracy and faceted Location (timezone estimate)
+```{r}
+ggplot(idbugs2, aes(disagreements, positionalaccuracy)) + 
+  geom_point(aes(color=taxon_family_name)) + 
+  ggtitle("Number of Disagreements by Positional Accuracy and faceted Location (timezone)")+
+  xlab("Number of Disagreements in ID") + ylab("Positional Accuracy") + facet_wrap( ~ timezone2 ) + 
+  theme(legend.position = "none")
+```
+
+  After creating this scatterplot that compares positional accuracy and number of disagreements while faceting by location (time zone estimate), not much information can be drawn from the results. It appears that most of the data has zero disagreements no matter the positional accuracy rating. In addition, there seems to be a slightly higher range in the number of disagreements among observations from non-North American continents while there is a higher range in positional accuracy. These discrepancies could be attributed to outliers.
+
+### Agreements and Disagreements by Location (timezone estimate)
+```{r}
+ggplot(idbugs2, aes(x = disagreements, y = agreements, fill=timezone2))+
+  geom_bar(stat="summary",fun.y="mean", position="dodge")+
+  geom_errorbar(stat="summary",position="dodge") +
+  ggtitle("Agreements and Disagreements by Location (timezone estimate)") +
+  xlab("Number of Disagreements") + ylab("Number of Agreements") + scale_y_continuous(breaks=seq(0, 5, 1)) + scale_x_continuous(breaks=seq(0,2,1))
+```
+
+  After creating this bar chart which compares the number of disagreements and agreements in identification between locations (time zone estimates), a few trends can be observed. It appears that observations outside of North and Central America have higher mean agreements and disagreements overall. Other continents are the only location group to have a mean of 2 disagreements and a mean of more than 5 agreements. This suggests that there is more identification discussion amongst groups from outside of North America.
+
+## Dimensionality Reduction using PCA
+
+  For this dataset, it was a better idea to use PAM clustering with gower as some of the most important variables in this dataset are categorical (Family, Genus, Species, Location (timezone2)). The following are the steps and code used to create this clustering.
+
+### Using gower to implement categorical variables in the clustering of the data.
+#### Converting  useful categorical variables into factor to allow for clustering
+```{r}
+idbugs3<-idbugs2 %>%
+  select(-id,-time_zone,-observed_on,-description, -quality_grade, -captive_cultivated, -place_guess, -coordinates, -species_guess, -scientific_name, -common_name, -timezone, -num_identification_agreements1, -num_identification_disagreements1) %>%
+  mutate_if(is.character,as.factor)
+```
+
+### Creating clusters using gower 
+```{r}
+gower1<-daisy(idbugs3,metric="gower") %>% scale
+```
+
+### Creating a silhouette plot to determine how many clusters should be used with pam
+```{r}
+sil_width<-vector()
+for(i in 2:10){
+pam_fit <- pam(gower1, diss = TRUE, k = i)
+sil_width[i] <- pam_fit$silinfo$avg.width
+} 
+ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name="k",breaks=1:10)
+```
+*After looking at the plot, it appears the most useful number of clusters is 2 clusters as it has the highest peak on the plot.*
+
+### Creating 2 clusters using PAM
+```{r}
+pam1<-pam(gower1,k=2,diss=T)
+pam_idbugs<-idbugs3%>%mutate(cluster=as.factor(pam1$clustering))
+```
+
+### View of clusters
+```{r}
+table<-pam_idbugs%>%group_by(timezone2)%>%count(cluster)%>%arrange(desc(n))%>%
+pivot_wider(names_from="cluster",values_from="n",values_fill = list('n'=0))
+table
+```
+*Clusters fit well for time zone*
+
+### GGpairs was not compatible with my data so I created two plots which compare my cluster accuracy amongst my numeric variables**
+```{r}
+ggplot(pam_idbugs, aes(x=positionalaccuracy,y=disagreements, color=cluster))+
+  geom_point()+
+  ggtitle("Clustering by Positional Accuracy and ID Disagreements") +
+  xlab("Positional Accuracy") +ylab("ID Disagreements")
+
+ggplot(pam_idbugs, aes(x=timezone2,y=accuracyratio, color=cluster)) +
+  geom_point() +
+  ggtitle("Clustering by Location (time zone estimate) and ID Accuracy Ratio") +
+  xlab("Location (Time zone estimate)") + ylab("ID Accuracy Ratio")
+```
+
+### Average silhouette length
+```{r}
+pam1$silinfo$avg.width 
+```
+
+####  I used PAM with gower to cluster this dataset. There is only a distinct clustering of the data for the time zone/location variable(as calculated using a silhouette plot to determine the right number of clusters). This is likely due to the fact that the time zone/location variable is split between two possible values as it is. Even so, the observations in cluster one tend to be observations from other continents and the observations from cluster 2 tend to be from North/Central America.  The other variables such as id accuracy ratio, family, genus, and species do not show any trends in the clustering. Despite all of this, the average silhouette length is rather large at .74 but from looking at the graphs, it is clear that these clusters do not fit the data very well. 
+
+
+
+
+
+

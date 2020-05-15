@@ -1,0 +1,5 @@
+"0","#Time in shelter for each cat (in months)
+cattime = [2, 6, 1, 8, 7, 5, 3, 4, 4]
+
+#Time in shelter for each dog (in months)
+dogtime = [3, 1, 2, 4, 2, 5, 6, 3, 8]"

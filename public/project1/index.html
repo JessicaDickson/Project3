@@ -1,0 +1,6985 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Jessica Sloan Dickson" />
+    <meta name="description" content="Describe your website">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>Project 1 by Sloan Dickson (JSD2385)</title>
+    <meta name="generator" content="Hugo 0.70.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/blog/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="/resume.pdf">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/project1/">Project 1 by Sloan Dickson (JSD2385)</a></strong>
+          </h3>
+        </div>
+        <div class="blog-title">
+          <h4>
+          January 1, 0001
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<div id="bug-bois-project-1-sloan-dickson-jsd2385" class="section level1">
+<h1>Bug Bois (Project 1): Sloan Dickson (JSD2385)</h1>
+<div id="introduciton" class="section level2">
+<h2>Introduciton</h2>
+<p>These datasets are from the iNaturalist website which collects wildlife data. The website collects this data from members who identify wildlife in their daily lives and submit the location, species identification, specimen descriptions, and photographs/audio recordings as well as a number of other variables. The iNaturalist community then looks at these submissions and tries to correctly identify the species and give more detail on its taxonomy and whether it belongs in that location or is invasive.
+The datasets I drew from this website are recordings of beetle sightings from the world (without USA data) in the first 6 months of 2019 (if I collected anymore data I would not have been able to export it due to size) and all insect sightings in the USA from all of 2019. They contain 38 and 37 variables respectfully, which are listed below using the names function (ID, time observed, quality_grade, etc.) The variables this project focuses on are the taxonomic variables, the time zone (which I will use, the accuracy of the and the number of agreements and disagreements observed.
+This dataset drew my attention because I have always liked to learn about entomology and this dataset both provides interesting observations of insects from around the world and shows what places in the world are most interested in entomology.
+I will be joining these datasets to only see beetle observations (USA and worldwide) and will be assessing the data for the following questions:
+- <em>Which families or species have the most discussion/disagreements on identification overall? </em>
+- <em>Does taxon predict discussion? </em>
+- <em>Are there differences in the amount of discussion in different parts of the world (North America and Central America vs other parts of the world)?</em>
+- <em>Are there different amounts of agreements/disagreements depending on the accuracy of the location data (higher values for positional accuracy are less accurate as it measures)? Are people more or less likely to consider species guesses valid depending on this variable?</em></p>
+<p><em>(A side note: After beginning working with this dataset, I realized that a large number of my numeric variables were essentially useless without individually editing their observations to make them useful. For example, the location information was all clumped together at the discretion of the person inputting the observation. This means that each observation was formatted differently (some added city, state, and even the street they were on while others just listed their country). This format makes it almost impossible to use as a grouping method, so I had to adapt the time_zone variable to give an estimate for location. Because a number of the numeric variables were formatted so irregularly, I had to resort to numeric variables I previously never considered such as positional_accuracy.)</em></p>
+<p>Let’s load in the datasets.</p>
+<pre class="r"><code>library(tidyverse)
+library(ggplot2)
+library(GGally)
+library(kableExtra)
+library(plotly)
+library(cluster)
+
+world_beetles &lt;- read.csv(&quot;beetles_2019.csv&quot;)
+usa_insects &lt;- read.csv(&quot;usa_insects.csv&quot;)
+
+#These datasets are both quite large in number of observations and in the number of variables and will likely need to be edited to be more manageable.</code></pre>
+<div id="this-dataset-contains-8462-observations-from-20190101-to-20190631" class="section level3">
+<h3>This dataset contains 8462 observations from 2019/01/01 to 2019/06/31</h3>
+<pre class="r"><code>glimpse(world_beetles)</code></pre>
+<pre><code>## Observations: 8,462
+## Variables: 38
+## $ id                               &lt;int&gt; 18177129, 19251162, 19342293, 193432…
+## $ observed_on_string               &lt;fct&gt; 2019-03-29, 2019-01-03 4:54:22 p.m. …
+## $ observed_on                      &lt;fct&gt; 2019-03-29, 2019-01-03, 2019-01-01, …
+## $ time_observed_at                 &lt;fct&gt; , 2019-01-03 16:54:22 UTC, 2018-12-3…
+## $ time_zone                        &lt;fct&gt; Quito, Edinburgh, Brisbane, Asia/Mag…
+## $ out_of_range                     &lt;fct&gt; , , , , , , , , , , , , , , , , , , …
+## $ user_login                       &lt;fct&gt; fcheca, bee-man, pierswarmers, lileb…
+## $ created_at                       &lt;fct&gt; 2018-11-06 20:20:53 UTC, 2018-12-27 …
+## $ updated_at                       &lt;fct&gt; 2019-03-30 20:01:38 UTC, 2019-01-03 …
+## $ quality_grade                    &lt;fct&gt; research, needs_id, research, resear…
+## $ description                      &lt;fct&gt; , , Huge beetle. About 10cm long. Ve…
+## $ id_please                        &lt;fct&gt; false, false, false, false, false, f…
+## $ num_identification_agreements    &lt;int&gt; 3, 0, 2, 1, 1, 1, 3, 1, 1, 3, 2, 4, …
+## $ num_identification_disagreements &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, …
+## $ captive_cultivated               &lt;fct&gt; false, false, false, false, false, f…
+## $ oauth_application_id             &lt;int&gt; NA, 2, 3, 3, 2, 111, 3, NA, 3, 111, …
+## $ place_guess                      &lt;fct&gt; &quot;Guajalito&quot;, &quot;56A Danecourt Rd, Pool…
+## $ latitude                         &lt;dbl&gt; -0.3305124, 50.7265199, -26.4110500,…
+## $ longitude                        &lt;dbl&gt; -78.609349, -1.958835, 152.829942, N…
+## $ positional_accuracy              &lt;int&gt; 244, 44, 165, 10988, 4, NA, 6, 15, 0…
+## $ geoprivacy                       &lt;fct&gt; , , , private, , obscured, , , , obs…
+## $ taxon_geoprivacy                 &lt;fct&gt; , , , , , , , , , , , , , , , , , , …
+## $ coordinates_obscured             &lt;fct&gt; false, false, false, true, false, tr…
+## $ positioning_method               &lt;fct&gt; , gps, , , , , , , , , , , , , , , ,…
+## $ positioning_device               &lt;fct&gt; , gps, , , , , , , , , , , , , , , ,…
+## $ species_guess                    &lt;fct&gt; Hippodamia convergens, Cockchafer Be…
+## $ scientific_name                  &lt;fct&gt; Hippodamia convergens, Melolontha, A…
+## $ common_name                      &lt;fct&gt; Convergent Lady Beetle, Cockchafer B…
+## $ iconic_taxon_name                &lt;fct&gt; Insecta, Insecta, Insecta, Insecta, …
+## $ taxon_id                         &lt;int&gt; 48987, 48199, 201855, 341892, 371066…
+## $ taxon_kingdom_name               &lt;fct&gt; Animalia, Animalia, Animalia, Animal…
+## $ taxon_phylum_name                &lt;fct&gt; Arthropoda, Arthropoda, Arthropoda, …
+## $ taxon_class_name                 &lt;fct&gt; Insecta, Insecta, Insecta, Insecta, …
+## $ taxon_order_name                 &lt;fct&gt; Coleoptera, Coleoptera, Coleoptera, …
+## $ taxon_family_name                &lt;fct&gt; Coccinellidae, Scarabaeidae, Ceramby…
+## $ taxon_genus_name                 &lt;fct&gt; Hippodamia, Melolontha, Agrianome, C…
+## $ taxon_species_name               &lt;fct&gt; Hippodamia convergens, , Agrianome s…
+## $ taxon_subspecies_name            &lt;fct&gt; , , , , , , , , , , , , , , , , , , …</code></pre>
+</div>
+<div id="there-are-38-variables-as-seen-below" class="section level3">
+<h3>There are 38 variables as seen below</h3>
+<pre class="r"><code>names(world_beetles)</code></pre>
+<pre><code>##  [1] &quot;id&quot;                               &quot;observed_on_string&quot;              
+##  [3] &quot;observed_on&quot;                      &quot;time_observed_at&quot;                
+##  [5] &quot;time_zone&quot;                        &quot;out_of_range&quot;                    
+##  [7] &quot;user_login&quot;                       &quot;created_at&quot;                      
+##  [9] &quot;updated_at&quot;                       &quot;quality_grade&quot;                   
+## [11] &quot;description&quot;                      &quot;id_please&quot;                       
+## [13] &quot;num_identification_agreements&quot;    &quot;num_identification_disagreements&quot;
+## [15] &quot;captive_cultivated&quot;               &quot;oauth_application_id&quot;            
+## [17] &quot;place_guess&quot;                      &quot;latitude&quot;                        
+## [19] &quot;longitude&quot;                        &quot;positional_accuracy&quot;             
+## [21] &quot;geoprivacy&quot;                       &quot;taxon_geoprivacy&quot;                
+## [23] &quot;coordinates_obscured&quot;             &quot;positioning_method&quot;              
+## [25] &quot;positioning_device&quot;               &quot;species_guess&quot;                   
+## [27] &quot;scientific_name&quot;                  &quot;common_name&quot;                     
+## [29] &quot;iconic_taxon_name&quot;                &quot;taxon_id&quot;                        
+## [31] &quot;taxon_kingdom_name&quot;               &quot;taxon_phylum_name&quot;               
+## [33] &quot;taxon_class_name&quot;                 &quot;taxon_order_name&quot;                
+## [35] &quot;taxon_family_name&quot;                &quot;taxon_genus_name&quot;                
+## [37] &quot;taxon_species_name&quot;               &quot;taxon_subspecies_name&quot;</code></pre>
+</div>
+<div id="this-dataset-contains-8462-observations-from-20190101-to-20191231" class="section level3">
+<h3>This dataset contains 8462 observations from 2019/01/01 to 2019/12/31</h3>
+<pre class="r"><code>glimpse(usa_insects)</code></pre>
+<pre><code>## Observations: 32,920
+## Variables: 37
+## $ id                               &lt;int&gt; 5942947, 19354339, 19360615, 1936103…
+## $ observed_on_string               &lt;fct&gt; Wed Apr 17 2019 15:26:11 GMT-0600 (M…
+## $ observed_on                      &lt;fct&gt; 2019-04-17, 2019-01-01, 2019-01-01, …
+## $ time_observed_at                 &lt;fct&gt; 2019-04-17 21:26:11 UTC, 2019-01-01 …
+## $ time_zone                        &lt;fct&gt; Mountain Time (US &amp; Canada), Eastern…
+## $ out_of_range                     &lt;fct&gt; , , , , , , , , , , , , , , , , , , …
+## $ created_at                       &lt;fct&gt; 2017-04-24 21:58:54 UTC, 2019-01-01 …
+## $ updated_at                       &lt;fct&gt; 2019-04-18 18:56:43 UTC, 2019-06-26 …
+## $ quality_grade                    &lt;fct&gt; needs_id, needs_id, needs_id, needs_…
+## $ description                      &lt;fct&gt; &quot;Shiny green insect (fly). Has black…
+## $ id_please                        &lt;fct&gt; false, false, false, false, false, f…
+## $ num_identification_agreements    &lt;int&gt; 2, 0, 0, 0, 3, 2, 1, 0, 1, 0, 0, 0, …
+## $ num_identification_disagreements &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ captive_cultivated               &lt;fct&gt; false, false, false, false, false, f…
+## $ oauth_application_id             &lt;int&gt; 3, 3, 2, 3, 2, 3, 2, 3, NA, 2, 3, 2,…
+## $ place_guess                      &lt;fct&gt; &quot;University of Texas at El Paso, El …
+## $ latitude                         &lt;dbl&gt; 31.77062, 43.67979, 41.07834, 30.143…
+## $ longitude                        &lt;dbl&gt; -106.50356, -72.31209, -73.78816, -8…
+## $ positional_accuracy              &lt;int&gt; 65, 50, 1393, 10, NA, 26, 9, 20, 187…
+## $ geoprivacy                       &lt;fct&gt; , , , , , , , , obscured, , , , , , …
+## $ taxon_geoprivacy                 &lt;fct&gt; , , , , , , , , , , , , , , , , , , …
+## $ coordinates_obscured             &lt;fct&gt; false, false, false, false, false, f…
+## $ positioning_method               &lt;fct&gt; , , , , gps, , , , , gps, , gps, , ,…
+## $ positioning_device               &lt;fct&gt; , , , , gps, , , , , gps, , gps, , ,…
+## $ species_guess                    &lt;fct&gt; &quot;Blow Flies&quot;, &quot;&quot;, &quot;moth&quot;, &quot;&quot;, &quot;Coleo…
+## $ scientific_name                  &lt;fct&gt; Calliphoridae, Insecta, Insecta, Ins…
+## $ common_name                      &lt;fct&gt; Blow Flies, Insects, Insects, Insect…
+## $ iconic_taxon_name                &lt;fct&gt; Insecta, Insecta, Insecta, Insecta, …
+## $ taxon_id                         &lt;int&gt; 61860, 47158, 47158, 47158, 174234, …
+## $ taxon_kingdom_name               &lt;fct&gt; Animalia, Animalia, Animalia, Animal…
+## $ taxon_phylum_name                &lt;fct&gt; Arthropoda, Arthropoda, Arthropoda, …
+## $ taxon_class_name                 &lt;fct&gt; Insecta, Insecta, Insecta, Insecta, …
+## $ taxon_order_name                 &lt;fct&gt; Diptera, , , , Lepidoptera, Hymenopt…
+## $ taxon_family_name                &lt;fct&gt; Calliphoridae, , , , Gelechiidae, Fo…
+## $ taxon_genus_name                 &lt;fct&gt; , , , , Coleotechnites, , Carausius,…
+## $ taxon_species_name               &lt;fct&gt; , , , , , , Carausius morosus, , Dan…
+## $ taxon_subspecies_name            &lt;fct&gt; , , , , , , , , , , , , , , , , , , …</code></pre>
+</div>
+<div id="there-are-37-variables-as-seen-below." class="section level3">
+<h3>There are 37 Variables as seen below.</h3>
+<pre class="r"><code>names(usa_insects)</code></pre>
+<pre><code>##  [1] &quot;id&quot;                               &quot;observed_on_string&quot;              
+##  [3] &quot;observed_on&quot;                      &quot;time_observed_at&quot;                
+##  [5] &quot;time_zone&quot;                        &quot;out_of_range&quot;                    
+##  [7] &quot;created_at&quot;                       &quot;updated_at&quot;                      
+##  [9] &quot;quality_grade&quot;                    &quot;description&quot;                     
+## [11] &quot;id_please&quot;                        &quot;num_identification_agreements&quot;   
+## [13] &quot;num_identification_disagreements&quot; &quot;captive_cultivated&quot;              
+## [15] &quot;oauth_application_id&quot;             &quot;place_guess&quot;                     
+## [17] &quot;latitude&quot;                         &quot;longitude&quot;                       
+## [19] &quot;positional_accuracy&quot;              &quot;geoprivacy&quot;                      
+## [21] &quot;taxon_geoprivacy&quot;                 &quot;coordinates_obscured&quot;            
+## [23] &quot;positioning_method&quot;               &quot;positioning_device&quot;              
+## [25] &quot;species_guess&quot;                    &quot;scientific_name&quot;                 
+## [27] &quot;common_name&quot;                      &quot;iconic_taxon_name&quot;               
+## [29] &quot;taxon_id&quot;                         &quot;taxon_kingdom_name&quot;              
+## [31] &quot;taxon_phylum_name&quot;                &quot;taxon_class_name&quot;                
+## [33] &quot;taxon_order_name&quot;                 &quot;taxon_family_name&quot;               
+## [35] &quot;taxon_genus_name&quot;                 &quot;taxon_species_name&quot;              
+## [37] &quot;taxon_subspecies_name&quot;</code></pre>
+</div>
+</div>
+<div id="tidying-the-datasets" class="section level2">
+<h2>Tidying the Datasets</h2>
+<p>To tidy this dataset, I will remove unnecessary variables who will just clutter the data (such as “username” and “observed_on_string”) these pieces of data are not the interest or are not useful. I am not going to use the time or date variables as the way they are input by users is inconsistent (ie: day, month year vs moth day year). I also will remove all the rows with NAs .
+Next I will create a coordinates variable which combines latitude and longitude while separating the variable &quot;taxon_species _name&quot; into “Genus” and “Species” so I can work with these variables more easily.
+As my datasets are already neat in the sense that they have one row per observation, I will not be able to use pivot longer or pivot wider in the raw data.</p>
+<div id="to-tidy-i-will-be-removing-non-essential-variables-from-each-dataset" class="section level3">
+<h3>To tidy I will be removing non-essential variables from each dataset</h3>
+<pre class="r"><code>beetles2 &lt;- world_beetles %&gt;% select(id, time_zone, observed_on, description,quality_grade, num_identification_agreements, num_identification_disagreements, captive_cultivated, place_guess, latitude, longitude, positional_accuracy, species_guess, scientific_name, common_name, taxon_order_name, taxon_family_name, taxon_species_name)
+usa2 &lt;- usa_insects %&gt;% select(id, time_zone, observed_on, description,quality_grade, num_identification_agreements, num_identification_disagreements, captive_cultivated, place_guess, latitude, longitude, positional_accuracy, species_guess, scientific_name, common_name, taxon_order_name, taxon_family_name, taxon_species_name)</code></pre>
+</div>
+<div id="i-am-going-to-remove-all-rows-with-nas-from-each-datset-to-make-them-easier-to-work-with" class="section level3">
+<h3>I am going to remove all rows with NAs from each datset to make them easier to work with</h3>
+<pre class="r"><code>beetles3 &lt;- beetles2 %&gt;% filter(complete.cases(beetles2))
+usa3 &lt;- usa2 %&gt;% filter(complete.cases(usa2))
+
+(beetles2 %&gt;% count())-(beetles3 %&gt;% count())</code></pre>
+<pre><code>##      n
+## 1 2257</code></pre>
+<pre class="r"><code>#2257 observations were lost when nas were removed from the beetles dataset
+(usa2 %&gt;% count())-(usa3 %&gt;% count())</code></pre>
+<pre><code>##       n
+## 1 10852</code></pre>
+<pre class="r"><code>#10852 observations were lost when nas were removed from the beetles dataset</code></pre>
+</div>
+<div id="next-i-will-combine-the-longitude-and-latitude-columns-and-separate-the-genus-and-species-into-2-columns" class="section level3">
+<h3>Next I will combine the longitude and latitude columns and separate the genus and species into 2 columns</h3>
+<pre class="r"><code>beetles4 &lt;- beetles3 %&gt;% 
+  unite(latitude, longitude, col=&quot;coordinates&quot;,sep=&quot;,&quot;) %&gt;% 
+  separate(&quot;taxon_species_name&quot;,into=c(&quot;Genus&quot;,&quot;Species&quot;))
+usa4 &lt;- usa3 %&gt;% 
+  unite(latitude, longitude, col=&quot;coordinates&quot;,sep=&quot;,&quot;) %&gt;% 
+  separate(&quot;taxon_species_name&quot;,into=c(&quot;Genus&quot;,&quot;Species&quot;))</code></pre>
+</div>
+<div id="the-data-is-now-tidy-enough-to-join" class="section level3">
+<h3>The data is now tidy enough to join</h3>
+<pre class="r"><code>glimpse(beetles4)</code></pre>
+<pre><code>## Observations: 6,205
+## Variables: 18
+## $ id                               &lt;int&gt; 18177129, 19251162, 19342293, 193436…
+## $ time_zone                        &lt;fct&gt; Quito, Edinburgh, Brisbane, Nuku&#39;alo…
+## $ observed_on                      &lt;fct&gt; 2019-03-29, 2019-01-03, 2019-01-01, …
+## $ description                      &lt;fct&gt; , , Huge beetle. About 10cm long. Ve…
+## $ quality_grade                    &lt;fct&gt; research, needs_id, research, needs_…
+## $ num_identification_agreements    &lt;int&gt; 3, 0, 2, 1, 3, 1, 1, 4, 1, 2, 1, 1, …
+## $ num_identification_disagreements &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, …
+## $ captive_cultivated               &lt;fct&gt; false, false, false, false, false, f…
+## $ place_guess                      &lt;fct&gt; &quot;Guajalito&quot;, &quot;56A Danecourt Rd, Pool…
+## $ coordinates                      &lt;chr&gt; &quot;-0.3305123546,-78.6093493434&quot;, &quot;50.…
+## $ positional_accuracy              &lt;int&gt; 244, 44, 165, 4, 6, 15, 0, 10, 45045…
+## $ species_guess                    &lt;fct&gt; Hippodamia convergens, Cockchafer Be…
+## $ scientific_name                  &lt;fct&gt; Hippodamia convergens, Melolontha, A…
+## $ common_name                      &lt;fct&gt; Convergent Lady Beetle, Cockchafer B…
+## $ taxon_order_name                 &lt;fct&gt; Coleoptera, Coleoptera, Coleoptera, …
+## $ taxon_family_name                &lt;fct&gt; Coccinellidae, Scarabaeidae, Ceramby…
+## $ Genus                            &lt;chr&gt; &quot;Hippodamia&quot;, &quot;&quot;, &quot;Agrianome&quot;, &quot;&quot;, &quot;…
+## $ Species                          &lt;chr&gt; &quot;convergens&quot;, NA, &quot;spinicollis&quot;, NA,…</code></pre>
+<pre class="r"><code>glimpse(usa4)</code></pre>
+<pre><code>## Observations: 22,068
+## Variables: 18
+## $ id                               &lt;int&gt; 5942947, 19354339, 19360615, 1936103…
+## $ time_zone                        &lt;fct&gt; Mountain Time (US &amp; Canada), Eastern…
+## $ observed_on                      &lt;fct&gt; 2019-04-17, 2019-01-01, 2019-01-01, …
+## $ description                      &lt;fct&gt; &quot;Shiny green insect (fly). Has black…
+## $ quality_grade                    &lt;fct&gt; needs_id, needs_id, needs_id, needs_…
+## $ num_identification_agreements    &lt;int&gt; 2, 0, 0, 0, 2, 1, 0, 1, 0, 0, 0, 0, …
+## $ num_identification_disagreements &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ captive_cultivated               &lt;fct&gt; false, false, false, false, false, f…
+## $ place_guess                      &lt;fct&gt; &quot;University of Texas at El Paso, El …
+## $ coordinates                      &lt;chr&gt; &quot;31.7706246942,-106.5035607347&quot;, &quot;43…
+## $ positional_accuracy              &lt;int&gt; 65, 50, 1393, 10, 26, 9, 20, 187, 33…
+## $ species_guess                    &lt;fct&gt; &quot;Blow Flies&quot;, &quot;&quot;, &quot;moth&quot;, &quot;&quot;, &quot;Myrmi…
+## $ scientific_name                  &lt;fct&gt; Calliphoridae, Insecta, Insecta, Ins…
+## $ common_name                      &lt;fct&gt; Blow Flies, Insects, Insects, Insect…
+## $ taxon_order_name                 &lt;fct&gt; Diptera, , , , Hymenoptera, Phasmida…
+## $ taxon_family_name                &lt;fct&gt; Calliphoridae, , , , Formicidae, Lon…
+## $ Genus                            &lt;chr&gt; &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;Carausius&quot;, &quot;&quot;,…
+## $ Species                          &lt;chr&gt; NA, NA, NA, NA, NA, &quot;morosus&quot;, NA, &quot;…</code></pre>
+</div>
+</div>
+<div id="joining-the-datasets" class="section level2">
+<h2>Joining the Datasets</h2>
+<p>To join these datasets, a left join will be conducted with world_beetles as the base. This means the dataset will lose observations from the usa_insects that are not beetles. This does not give us the full picture of the insect observations for the United States, but it does allow the project to focus on only the beetles. The observations lost might include more information about identification disputes and positional accuracy trends for iNaturalist users within the United States, but this allows a closer look into those variables and there association to beetle sightings alone.</p>
+<div id="how-many-observations-were-in-the-original-datasets" class="section level3">
+<h3>How many Observations were in the original datasets?</h3>
+<pre class="r"><code>count(beetles4)+count(usa4)</code></pre>
+<pre><code>##       n
+## 1 28273</code></pre>
+<p><em>28273 observations total.</em></p>
+<p>###Left join</p>
+<pre class="r"><code>totalbeetlebois &lt;- beetles4 %&gt;% left_join(usa4)</code></pre>
+<pre class="r"><code>(count(beetles4)+count(usa4))-count(totalbeetlebois)</code></pre>
+<pre><code>##       n
+## 1 22068</code></pre>
+<p><em>22068 observations were lost in the process.</em></p>
+<pre class="r"><code>count(totalbeetlebois)</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##       n
+##   &lt;int&gt;
+## 1  6205</code></pre>
+<p><em>6205 observations remain.</em></p>
+</div>
+</div>
+<div id="wrangling" class="section level2">
+<h2>Wrangling</h2>
+<div id="i-will-first-filter-out-all-abservations-with-no-identification-comparisons-for-the-insects" class="section level3">
+<h3>I will first filter out all abservations with no identification comparisons for the insects</h3>
+<pre class="r"><code>names(totalbeetlebois)</code></pre>
+<pre><code>##  [1] &quot;id&quot;                               &quot;time_zone&quot;                       
+##  [3] &quot;observed_on&quot;                      &quot;description&quot;                     
+##  [5] &quot;quality_grade&quot;                    &quot;num_identification_agreements&quot;   
+##  [7] &quot;num_identification_disagreements&quot; &quot;captive_cultivated&quot;              
+##  [9] &quot;place_guess&quot;                      &quot;coordinates&quot;                     
+## [11] &quot;positional_accuracy&quot;              &quot;species_guess&quot;                   
+## [13] &quot;scientific_name&quot;                  &quot;common_name&quot;                     
+## [15] &quot;taxon_order_name&quot;                 &quot;taxon_family_name&quot;               
+## [17] &quot;Genus&quot;                            &quot;Species&quot;</code></pre>
+</div>
+<div id="i-want-a-nonzero-number-of-identifications-in-both-the-agreements-and-disagreements-categories" class="section level3">
+<h3>I want a nonzero number of identifications in both the agreements and disagreements categories</h3>
+<pre class="r"><code>test1&lt;-totalbeetlebois %&gt;% filter(num_identification_agreements &gt; 0)
+test2&lt;-totalbeetlebois %&gt;% filter(num_identification_disagreements &gt; 0)</code></pre>
+</div>
+<div id="now-i-will-join-both-of-my-tests-into-a-new-dataset" class="section level3">
+<h3>Now I will join both of my tests into a new dataset</h3>
+<pre class="r"><code>idbugs &lt;- test1 %&gt;% full_join(test2)</code></pre>
+<p><em>Now the only observations remaining are those who have been graded.</em></p>
+<p>###Now I will create a numeric variable from time zone which categorizes whether the obsevation is the North/Central America or not (0=NA/CA, 1=Not NA/CA)</p>
+<pre class="r"><code>idbugs &lt;- idbugs %&gt;% 
+  mutate(timezone=case_when(time_zone %in% 
+                              c(&quot;Eastern Time (US &amp; Canada)&quot;,&quot;Central Time (US &amp; Canada)&quot;, &quot;Hawaii&quot;,    
+                                &quot;Pacific Time (US &amp; Canada)&quot;,&quot;Mountain Time (US &amp; Canada)&quot;, &quot;Arizona&quot;, 
+                                &quot;Alaska&quot;, &quot;America/Los_Angeles&quot;, &quot;America/New_York&quot;) ~ 0, 
+                            time_zone %in% c(&quot;Quito&quot;, &quot;Brisbane&quot;, &quot;Nuku&#39;alofaAsia/Magadan&quot;, &quot;Wellington&quot;, 
+                                             &quot;Australia/Perth&quot;, &quot;Mid-Atlantic&quot;, &quot;Europe/London&quot;,&quot;Jerusalem&quot;, 
+                                             &quot;Amsterdam&quot;,&quot;Africa/Johannesburg&quot;, &quot;Chennai&quot;, &quot;UTC&quot;, &quot;Osaka&quot;, 
+                                             &quot;Paris&quot;, &quot;Sydney&quot;, &quot;Santiago&quot;, &quot;Bangkok&quot;, &quot;Samoa&quot;, &quot;Baghdad&quot;, 
+                                             &quot;West Central Africa&quot;, &quot;Pretoria&quot;, &quot;Singapore&quot;, &quot;Athens&quot;, 
+                                             &quot;Ekaterinburg&quot;, &quot;Hong Kong&quot;, &quot;Almaty&quot;, &quot;Vienna&quot;, 
+                                             &quot;Central America&quot;, &quot;Buenos Aires&quot;, &quot;London&quot;, &quot;Lima&quot;, &quot;Brasilia&quot;, 
+                                             &quot;Jakarta&quot;, &quot;Bogota&quot;, &quot;Kuala Lumpur&quot;,&quot;Auckland&quot;, &quot;Perth&quot;, 
+                                             &quot;Casablanca&quot;, &quot;Adelaide&quot;, &quot;Mexico City&quot;, &quot;Melbourne&quot;, &quot;Rome&quot;, 
+                                             &quot;Kyiv&quot;, &quot;Stockholm&quot;, &quot;Nairobi&quot;, &quot;Taipei&quot;, &quot;Berlin&quot;, &quot;Madrid&quot;, 
+                                             &quot;Atlantic Time (Canada)&quot;, &quot;Beijing&quot;, &quot;Prague&quot;, &quot;Tijuana&quot;, 
+                                             &quot;Edinburgh&quot;, &quot;Montevideo&quot;, &quot;Copenhagen&quot;, &quot;Lisbon&quot;, &quot;Abu Dhabi&quot;, 
+                                             &quot;Bern&quot;, &quot;Belgrade&quot;, &quot;Monterrey&quot;, &quot;Mazatlan&quot;, &quot;La Paz&quot;, &quot;Brussels&quot;,
+                                             &quot;Guadalajara&quot;, &quot;Istanbul&quot;, &quot;Hobart&quot;, &quot;Pacific/Majuro&quot;, &quot;Moscow&quot;, 
+                                             &quot;Yerevan&quot;, &quot;Vilnius&quot;, &quot;New Delhi&quot;, &quot;Tokyo&quot;, &quot;Zagreb&quot;, &quot;Sofia&quot;, 
+                                             &quot;Seoul&quot;, &quot;Ljubljana&quot;, &quot;Sri Jayawardenepura&quot;, &quot;Warsaw&quot;, 
+                                             &quot;Bucharest&quot;, &quot;Bratislava&quot;, &quot;Chihuahua&quot;, 
+                                             &quot;Atlantic/Cape_Verde&quot; ,&quot;Islamabad&quot;, &quot;American Samoa&quot;, 
+                                             &quot;Cairo&quot;) ~ 1)) %&gt;% na.omit() %&gt;% glimpse()</code></pre>
+<pre><code>## Observations: 3,943
+## Variables: 19
+## $ id                               &lt;int&gt; 18177129, 19342293, 19345676, 193465…
+## $ time_zone                        &lt;chr&gt; &quot;Quito&quot;, &quot;Brisbane&quot;, &quot;Wellington&quot;, &quot;…
+## $ observed_on                      &lt;chr&gt; &quot;2019-03-29&quot;, &quot;2019-01-01&quot;, &quot;2019-01…
+## $ description                      &lt;chr&gt; &quot;&quot;, &quot;Huge beetle. About 10cm long. V…
+## $ quality_grade                    &lt;fct&gt; research, research, research, resear…
+## $ num_identification_agreements    &lt;int&gt; 3, 2, 1, 4, 1, 1, 1, 1, 1, 1, 1, 2, …
+## $ num_identification_disagreements &lt;int&gt; 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ captive_cultivated               &lt;fct&gt; false, false, false, false, false, f…
+## $ place_guess                      &lt;chr&gt; &quot;Guajalito&quot;, &quot;4568, Federal, QLD, AU…
+## $ coordinates                      &lt;chr&gt; &quot;-0.3305123546,-78.6093493434&quot;, &quot;-26…
+## $ positional_accuracy              &lt;int&gt; 244, 165, 15, 10, 198, 10, 5, 4, 165…
+## $ species_guess                    &lt;chr&gt; &quot;Hippodamia convergens&quot;, &quot;Poinciana …
+## $ scientific_name                  &lt;chr&gt; &quot;Hippodamia convergens&quot;, &quot;Agrianome …
+## $ common_name                      &lt;chr&gt; &quot;Convergent Lady Beetle&quot;, &quot;Poinciana…
+## $ taxon_order_name                 &lt;chr&gt; &quot;Coleoptera&quot;, &quot;Coleoptera&quot;, &quot;Coleopt…
+## $ taxon_family_name                &lt;chr&gt; &quot;Coccinellidae&quot;, &quot;Cerambycidae&quot;, &quot;Oe…
+## $ Genus                            &lt;chr&gt; &quot;Hippodamia&quot;, &quot;Agrianome&quot;, &quot;Thelypha…
+## $ Species                          &lt;chr&gt; &quot;convergens&quot;, &quot;spinicollis&quot;, &quot;lineat…
+## $ timezone                         &lt;dbl&gt; 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, …</code></pre>
+</div>
+<div id="what-is-the-ratio-of-agreements-to-disagreements-in-identification-for-each-observation" class="section level3">
+<h3>What is the ratio of agreements to disagreements in identification for each observation?</h3>
+<p><em>Creating a new variable called “acuracy_ratio”</em></p>
+<pre class="r"><code>idbugs &lt;- idbugs %&gt;% mutate(num_identification_agreements1=(num_identification_agreements+1)) %&gt;% mutate(num_identification_disagreements1=(num_identification_disagreements+1))%&gt;% mutate(accuracy_ratio = num_identification_agreements1/num_identification_disagreements1)</code></pre>
+</div>
+<div id="what-is-the-observation-with-the-highest-number-of-disagreements-in-identification" class="section level3">
+<h3>What is the observation with the highest number of disagreements in identification?</h3>
+<pre class="r"><code>idbugs %&gt;% select(id, Genus, Species, num_identification_disagreements) %&gt;% arrange(desc(num_identification_disagreements))</code></pre>
+<pre><code>##          id         Genus       Species num_identification_disagreements
+## 1  20357446   Thelyphassa       lineata                                2
+## 2  19346580  Aspidimorpha      miliaris                                1
+## 3  19425467    Dienerella     costulata                                1
+## 4  19437752   Cheilomenes     propinqua                                1
+## 5  19471161    Trypoxylus    dichotomus                                1
+## 6  19597528      Harmonia      axyridis                                1
+## 7  19627114      Harmonia     dimidiata                                1
+## 8  19691690      Harmonia      axyridis                                1
+## 9  19829972      Alobates pensylvanicus                                1
+## 10 20051896     Scolypopa     australis                                1
+## 11 20078171       Carabus    granulatus                                1
+## 12 20164619    Hippodamia    convergens                                1
+## 13 20302656        Copris      hispanus                                1
+## 14 20310486      Harmonia      axyridis                                1
+## 15 20315041     Tanystoma   maculicolle                                1
+## 16 20320009   Peltotrupes     profundus                                1
+## 17 20416205 Hemisphaerota        cyanea                                1
+## 18 20429563      Harmonia      axyridis                                1
+## 19 20489440         Meloe proscarabaeus                                1
+## 20 20652077      Typhaeus      typhoeus                                1
+## 21 20725176    Oplostomus    fuligineus                                1
+## 22 20735333       Eleodes      osculans                                1
+## 23 20833414    Coptocycla        texana                                1
+## 24 20884876    Coccinella   californica                                1
+## 25 20914239   Cysteodemus       armatus                                1
+##  [ reached &#39;max&#39; / getOption(&quot;max.print&quot;) -- omitted 3918 rows ]</code></pre>
+<p><em>Observation 20357446 - Thelyphassa lineata</em></p>
+</div>
+<div id="now-to-make-it-easier-to-tidy-later-i-am-adjusting-the-names." class="section level3">
+<h3>Now to make it easier to tidy later, I am adjusting the names.</h3>
+<pre class="r"><code>idbugs &lt;- rename(idbugs, agreements=num_identification_agreements)
+idbugs &lt;- rename(idbugs, disagreements=num_identification_disagreements)
+idbugs &lt;- rename(idbugs, positionalaccuracy=positional_accuracy)
+idbugs &lt;- rename(idbugs, accuracyratio=accuracy_ratio)</code></pre>
+</div>
+<div id="how-many-distinct-outcomes-are-there-of-each-variable" class="section level3">
+<h3>How many distinct outcomes are there of each variable?</h3>
+<pre class="r"><code>idbugs %&gt;% summarize_all(n_distinct)</code></pre>
+<pre><code>##     id time_zone observed_on description quality_grade agreements disagreements
+## 1 3943        90          90         843             3          9             3
+##   captive_cultivated place_guess coordinates positionalaccuracy species_guess
+## 1                  2        2753        3792                608           859
+##   scientific_name common_name taxon_order_name taxon_family_name Genus Species
+## 1             603         475                8                68   430     527
+##   timezone num_identification_agreements1 num_identification_disagreements1
+## 1        2                              9                                 3
+##   accuracyratio
+## 1            11</code></pre>
+</div>
+<div id="now-i-will-create-summary-statistics-of-each-numeric-variable" class="section level3">
+<h3>Now I will create summary statistics of each numeric variable</h3>
+<pre class="r"><code>idbugs %&gt;% names()</code></pre>
+<pre><code>##  [1] &quot;id&quot;                                &quot;time_zone&quot;                        
+##  [3] &quot;observed_on&quot;                       &quot;description&quot;                      
+##  [5] &quot;quality_grade&quot;                     &quot;agreements&quot;                       
+##  [7] &quot;disagreements&quot;                     &quot;captive_cultivated&quot;               
+##  [9] &quot;place_guess&quot;                       &quot;coordinates&quot;                      
+## [11] &quot;positionalaccuracy&quot;                &quot;species_guess&quot;                    
+## [13] &quot;scientific_name&quot;                   &quot;common_name&quot;                      
+## [15] &quot;taxon_order_name&quot;                  &quot;taxon_family_name&quot;                
+## [17] &quot;Genus&quot;                             &quot;Species&quot;                          
+## [19] &quot;timezone&quot;                          &quot;num_identification_agreements1&quot;   
+## [21] &quot;num_identification_disagreements1&quot; &quot;accuracyratio&quot;</code></pre>
+<pre class="r"><code>idbugs %&gt;% select(-id) %&gt;% select(-num_identification_agreements1) %&gt;% select(-num_identification_disagreements1) %&gt;% summarize_if(is.numeric, mean, na.rm=T)</code></pre>
+<pre><code>##   agreements disagreements positionalaccuracy timezone accuracyratio
+## 1   1.747654    0.01470961           4469.378 0.471722      2.718996</code></pre>
+<pre class="r"><code>idbugs %&gt;% select(-id) %&gt;% select(-num_identification_agreements1) %&gt;% select(-num_identification_disagreements1) %&gt;% summarize_if(is.numeric, sd, na.rm=T)</code></pre>
+<pre><code>##   agreements disagreements positionalaccuracy timezone accuracyratio
+## 1  0.9171565     0.1224919           87717.01 0.499263     0.9057776</code></pre>
+<pre class="r"><code>idbugs %&gt;% select(-id) %&gt;% select(-num_identification_agreements1) %&gt;% select(-num_identification_disagreements1) %&gt;% summarize_if(is.numeric, funs(n = n()))</code></pre>
+<pre><code>##   agreements_n disagreements_n positionalaccuracy_n timezone_n accuracyratio_n
+## 1         3943            3943                 3943       3943            3943</code></pre>
+<pre class="r"><code>idbugs %&gt;% select(-id) %&gt;% select(-num_identification_agreements1) %&gt;% select(-num_identification_disagreements1) %&gt;% summarize_if(is.numeric, n_distinct)</code></pre>
+<pre><code>##   agreements disagreements positionalaccuracy timezone accuracyratio
+## 1          9             3                608        2            11</code></pre>
+<pre class="r"><code>idbugs %&gt;% summarize_if(is.numeric, list(Q3=quantile), probs=.75, na.rm=T)</code></pre>
+<pre><code>##      id_Q3 agreements_Q3 disagreements_Q3 positionalaccuracy_Q3 timezone_Q3
+## 1 21628623             2                0                 128.5           1
+##   num_identification_agreements1_Q3 num_identification_disagreements1_Q3
+## 1                                 3                                    1
+##   accuracyratio_Q3
+## 1                3</code></pre>
+<pre class="r"><code>idbugs %&gt;% summarize_if(is.numeric, list(Q1=quantile), probs=.25, na.rm=T)</code></pre>
+<pre><code>##      id_Q1 agreements_Q1 disagreements_Q1 positionalaccuracy_Q1 timezone_Q1
+## 1 20351936             1                0                     7           0
+##   num_identification_agreements1_Q1 num_identification_disagreements1_Q1
+## 1                                 2                                    1
+##   accuracyratio_Q1
+## 1                2</code></pre>
+<pre class="r"><code>idbugs %&gt;% summarize_all(n_distinct)</code></pre>
+<pre><code>##     id time_zone observed_on description quality_grade agreements disagreements
+## 1 3943        90          90         843             3          9             3
+##   captive_cultivated place_guess coordinates positionalaccuracy species_guess
+## 1                  2        2753        3792                608           859
+##   scientific_name common_name taxon_order_name taxon_family_name Genus Species
+## 1             603         475                8                68   430     527
+##   timezone num_identification_agreements1 num_identification_disagreements1
+## 1        2                              9                                 3
+##   accuracyratio
+## 1            11</code></pre>
+<div id="summary-of-the-dataset" class="section level4">
+<h4>Summary of the dataset</h4>
+<p>After calculating the summary statistics for each variable a few notes can be made. The first is that the average number of agreements in identification is higher than that of the disagreements (1.747654 and 0.01470961 respectfully). In addition, the id agreements has a greater standard deviation of 0.9171565 compared to the disagreements’ 0.1224919. This difference in variance is also reflected in the IQR. The variable positional accuracy has a rather high mean of 4469.378 with a high standard deviation of 87717.01.</p>
+</div>
+</div>
+<div id="correlation-matrix-among-numeric-variables" class="section level3">
+<h3>Correlation matrix among numeric variables</h3>
+<pre class="r"><code>cor_idbugs &lt;- idbugs %&gt;% select_if(is.numeric) %&gt;% select(-num_identification_agreements1,-num_identification_disagreements1, -id) %&gt;% na.omit %&gt;% cor
+library(kableExtra)
+cor_idbugs %&gt;% kable() %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+agreements
+</th>
+<th style="text-align:right;">
+disagreements
+</th>
+<th style="text-align:right;">
+positionalaccuracy
+</th>
+<th style="text-align:right;">
+timezone
+</th>
+<th style="text-align:right;">
+accuracyratio
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:right;">
+0.1594994
+</td>
+<td style="text-align:right;">
+-0.0184377
+</td>
+<td style="text-align:right;">
+0.1159875
+</td>
+<td style="text-align:right;">
+0.9641577
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:right;">
+0.1594994
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:right;">
+-0.0024875
+</td>
+<td style="text-align:right;">
+0.0233956
+</td>
+<td style="text-align:right;">
+-0.1022066
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:right;">
+-0.0184377
+</td>
+<td style="text-align:right;">
+-0.0024875
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:right;">
+0.0025414
+</td>
+<td style="text-align:right;">
+-0.0180167
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:right;">
+0.1159875
+</td>
+<td style="text-align:right;">
+0.0233956
+</td>
+<td style="text-align:right;">
+0.0025414
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:right;">
+0.1111645
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:right;">
+0.9641577
+</td>
+<td style="text-align:right;">
+-0.1022066
+</td>
+<td style="text-align:right;">
+-0.0180167
+</td>
+<td style="text-align:right;">
+0.1111645
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+</tr>
+</tbody>
+</table>
+<div id="summary-of-correlations" class="section level4">
+<h4>Summary of Correlations</h4>
+<p>The correlations amongst all of the numeric variables are rather low. The highest correlation between variables is between the id accuracy ratio and the id agreements. This is due to the fact that they are inherently related as the accuracy ratio is made up of the combined agreements and disagreements. The other variables have correlations of lower magnitude than .2 which suggests that there is not a relationship.</p>
+</div>
+</div>
+</div>
+<div id="now-i-will-create-summary-statistics-of-each-variable-by-the-genus-and-species-of-the-beetles." class="section level2">
+<h2>Now I will create summary statistics of each variable by the Genus and Species of the beetles.</h2>
+<p>I want to answer the questions:
+<em>Are some species more likely to have disagreements in their identification?
+</em>Are some species more likely to have issues with higher accuracy?
+*Which Species had the highest number of observations?</p>
+<div id="creating-summary-stats-individually" class="section level3">
+<h3>Creating Summary stats Individually</h3>
+<pre class="r"><code>genusspecies_means &lt;- idbugs %&gt;% 
+  group_by(Genus, Species) %&gt;%
+  select(-id) %&gt;% 
+  select(-num_identification_agreements1) %&gt;%
+  select(-num_identification_disagreements1) %&gt;%
+  summarize_if(is.numeric, mean, na.rm=T) %&gt;% 
+  mutate_if(is.numeric, round)
+
+genusspecies_sd &lt;- idbugs %&gt;% 
+  group_by(Genus, Species) %&gt;% 
+  select(-id) %&gt;% 
+  select(-num_identification_agreements1) %&gt;% 
+  select(-num_identification_disagreements1) %&gt;%
+  summarize_if(is.numeric, sd, na.rm=T) %&gt;% 
+  mutate_if(is.numeric, round)
+
+genusspecies.n &lt;- idbugs %&gt;% 
+  group_by(Genus, Species) %&gt;% 
+  select(-id) %&gt;% 
+  select(-num_identification_agreements1) %&gt;% 
+  select(-num_identification_disagreements1) %&gt;%
+  summarize_if(is.numeric, funs(n = n())) %&gt;% 
+  mutate_if(is.numeric, round)
+
+genusspecies.distinct &lt;- idbugs %&gt;% 
+  group_by(Genus, Species) %&gt;% 
+  select(-id) %&gt;% 
+  select(-num_identification_agreements1) %&gt;% 
+  select(-num_identification_disagreements1) %&gt;%
+  summarize_if(is.numeric, funs(n = n())) %&gt;% 
+  mutate_if(is.numeric, n_distinct)
+
+genusspecies.Q3 &lt;- idbugs %&gt;% 
+  group_by(Genus, Species) %&gt;% 
+  select(-id) %&gt;% 
+  select(-num_identification_agreements1) %&gt;% 
+  select(-num_identification_disagreements1) %&gt;%
+  summarize_if(is.numeric, list(Q3=quantile), probs=.75, na.rm=T) %&gt;% 
+  mutate_if(is.numeric, round)
+
+genusspecies.Q1 &lt;- idbugs %&gt;% 
+  group_by(Genus, Species) %&gt;% 
+  select(-id) %&gt;% 
+  select(-num_identification_agreements1) %&gt;% 
+  select(-num_identification_disagreements1) %&gt;%
+  summarize_if(is.numeric, list(Q1=quantile), probs=.25, na.rm=T) %&gt;% 
+  mutate_if(is.numeric, round)</code></pre>
+</div>
+<div id="combining-all-of-these-summary-stats" class="section level3">
+<h3>Combining all of these summary stats</h3>
+<pre class="r"><code>genspec_m_sd &lt;- left_join(genusspecies_means, genusspecies_sd, by=c(&quot;Species&quot;,&quot;Genus&quot;), suffix=c(&quot;.mean&quot;,&quot;.sd&quot;))
+genspec_n_dist &lt;- left_join(genusspecies.n, genusspecies.distinct, by=c(&quot;Species&quot;,&quot;Genus&quot;), suffix=c(&quot;.n&quot;,&quot;.distinct&quot;))
+genspec_Q1_Q3 &lt;- left_join(genusspecies.Q1, genusspecies.Q3, by=c(&quot;Species&quot;,&quot;Genus&quot;), suffix=c(&quot;.Q1&quot;,&quot;.Q3&quot;))
+
+genusspecies_summary &lt;- genspec_m_sd %&gt;% full_join(genspec_n_dist) %&gt;% full_join(genspec_Q1_Q3)</code></pre>
+</div>
+<div id="removing-the-na-rows-and-columns-from-genusspecies_summary" class="section level3">
+<h3>Removing the N/A rows and columns from genusspecies_summary</h3>
+<pre class="r"><code>genusspecies_summary &lt;- genusspecies_summary %&gt;% arrange(Species)
+genusspecies_summary &lt;- genusspecies_summary %&gt;% arrange(Species) %&gt;% slice(4:1800)
+genusspecies_summary &lt;- genusspecies_summary %&gt;% na.omit()
+
+genusspecies_summary &lt;- genusspecies_summary %&gt;% na.omit() 
+
+glimpse(genusspecies_summary)</code></pre>
+<pre><code>## Observations: 31
+## Variables: 32
+## Groups: Genus [12]
+## $ Genus                         &lt;chr&gt; &quot;Aspidimorpha&quot;, &quot;Chilocorus&quot;, &quot;Cicindel…
+## $ Species                       &lt;chr&gt; &quot;sanctaecrucis&quot;, &quot;stigma&quot;, &quot;formosa&quot;, &quot;…
+## $ agreements.mean               &lt;dbl&gt; 2, 1, 2, 2, 3, 4, 1, 2, 2, 2, 2, 2, 2, …
+## $ disagreements.mean            &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ positionalaccuracy.mean       &lt;dbl&gt; 159, 83, 8, 10, 697, 496, 142, 380, 113…
+## $ timezone.mean                 &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ accuracyratio.mean            &lt;dbl&gt; 2, 2, 2, 3, 4, 4, 2, 3, 3, 3, 3, 3, 3, …
+## $ agreements.sd                 &lt;dbl&gt; 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, …
+## $ disagreements.sd              &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ positionalaccuracy.sd         &lt;dbl&gt; 134, 244, 4, 6, 1441, 171, 82, 896, 237…
+## $ timezone.sd                   &lt;dbl&gt; 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ accuracyratio.sd              &lt;dbl&gt; 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, …
+## $ agreements_n.n                &lt;dbl&gt; 4, 11, 2, 3, 10, 2, 4, 13, 16, 76, 3, 1…
+## $ disagreements_n.n             &lt;dbl&gt; 4, 11, 2, 3, 10, 2, 4, 13, 16, 76, 3, 1…
+## $ positionalaccuracy_n.n        &lt;dbl&gt; 4, 11, 2, 3, 10, 2, 4, 13, 16, 76, 3, 1…
+## $ timezone_n.n                  &lt;dbl&gt; 4, 11, 2, 3, 10, 2, 4, 13, 16, 76, 3, 1…
+## $ accuracyratio_n.n             &lt;dbl&gt; 4, 11, 2, 3, 10, 2, 4, 13, 16, 76, 3, 1…
+## $ agreements_n.distinct         &lt;int&gt; 4, 4, 12, 12, 12, 12, 12, 12, 12, 12, 1…
+## $ disagreements_n.distinct      &lt;int&gt; 4, 4, 12, 12, 12, 12, 12, 12, 12, 12, 1…
+## $ positionalaccuracy_n.distinct &lt;int&gt; 4, 4, 12, 12, 12, 12, 12, 12, 12, 12, 1…
+## $ timezone_n.distinct           &lt;int&gt; 4, 4, 12, 12, 12, 12, 12, 12, 12, 12, 1…
+## $ accuracyratio_n.distinct      &lt;int&gt; 4, 4, 12, 12, 12, 12, 12, 12, 12, 12, 1…
+## $ agreements_Q1                 &lt;dbl&gt; 1, 1, 2, 2, 2, 3, 1, 1, 1, 1, 2, 1, 1, …
+## $ disagreements_Q1              &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ positionalaccuracy_Q1         &lt;dbl&gt; 71, 5, 6, 7, 18, 436, 103, 15, 19, 10, …
+## $ timezone_Q1                   &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ accuracyratio_Q1              &lt;dbl&gt; 2, 2, 2, 3, 3, 4, 2, 2, 2, 2, 3, 2, 2, …
+## $ agreements_Q3                 &lt;dbl&gt; 2, 1, 3, 2, 4, 4, 1, 3, 2, 3, 2, 2, 3, …
+## $ disagreements_Q3              &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ positionalaccuracy_Q3         &lt;dbl&gt; 234, 12, 9, 12, 407, 556, 176, 299, 515…
+## $ timezone_Q3                   &lt;dbl&gt; 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ accuracyratio_Q3              &lt;dbl&gt; 2, 2, 3, 3, 5, 5, 2, 4, 3, 4, 4, 4, 4, …</code></pre>
+</div>
+<div id="this-is-the-completed-summary-dataset" class="section level3">
+<h3>This is the completed summary dataset</h3>
+<pre class="r"><code>glimpse(genusspecies_summary)</code></pre>
+<pre><code>## Observations: 31
+## Variables: 32
+## Groups: Genus [12]
+## $ Genus                         &lt;chr&gt; &quot;Aspidimorpha&quot;, &quot;Chilocorus&quot;, &quot;Cicindel…
+## $ Species                       &lt;chr&gt; &quot;sanctaecrucis&quot;, &quot;stigma&quot;, &quot;formosa&quot;, &quot;…
+## $ agreements.mean               &lt;dbl&gt; 2, 1, 2, 2, 3, 4, 1, 2, 2, 2, 2, 2, 2, …
+## $ disagreements.mean            &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ positionalaccuracy.mean       &lt;dbl&gt; 159, 83, 8, 10, 697, 496, 142, 380, 113…
+## $ timezone.mean                 &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ accuracyratio.mean            &lt;dbl&gt; 2, 2, 2, 3, 4, 4, 2, 3, 3, 3, 3, 3, 3, …
+## $ agreements.sd                 &lt;dbl&gt; 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, …
+## $ disagreements.sd              &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ positionalaccuracy.sd         &lt;dbl&gt; 134, 244, 4, 6, 1441, 171, 82, 896, 237…
+## $ timezone.sd                   &lt;dbl&gt; 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ accuracyratio.sd              &lt;dbl&gt; 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, …
+## $ agreements_n.n                &lt;dbl&gt; 4, 11, 2, 3, 10, 2, 4, 13, 16, 76, 3, 1…
+## $ disagreements_n.n             &lt;dbl&gt; 4, 11, 2, 3, 10, 2, 4, 13, 16, 76, 3, 1…
+## $ positionalaccuracy_n.n        &lt;dbl&gt; 4, 11, 2, 3, 10, 2, 4, 13, 16, 76, 3, 1…
+## $ timezone_n.n                  &lt;dbl&gt; 4, 11, 2, 3, 10, 2, 4, 13, 16, 76, 3, 1…
+## $ accuracyratio_n.n             &lt;dbl&gt; 4, 11, 2, 3, 10, 2, 4, 13, 16, 76, 3, 1…
+## $ agreements_n.distinct         &lt;int&gt; 4, 4, 12, 12, 12, 12, 12, 12, 12, 12, 1…
+## $ disagreements_n.distinct      &lt;int&gt; 4, 4, 12, 12, 12, 12, 12, 12, 12, 12, 1…
+## $ positionalaccuracy_n.distinct &lt;int&gt; 4, 4, 12, 12, 12, 12, 12, 12, 12, 12, 1…
+## $ timezone_n.distinct           &lt;int&gt; 4, 4, 12, 12, 12, 12, 12, 12, 12, 12, 1…
+## $ accuracyratio_n.distinct      &lt;int&gt; 4, 4, 12, 12, 12, 12, 12, 12, 12, 12, 1…
+## $ agreements_Q1                 &lt;dbl&gt; 1, 1, 2, 2, 2, 3, 1, 1, 1, 1, 2, 1, 1, …
+## $ disagreements_Q1              &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ positionalaccuracy_Q1         &lt;dbl&gt; 71, 5, 6, 7, 18, 436, 103, 15, 19, 10, …
+## $ timezone_Q1                   &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ accuracyratio_Q1              &lt;dbl&gt; 2, 2, 2, 3, 3, 4, 2, 2, 2, 2, 3, 2, 2, …
+## $ agreements_Q3                 &lt;dbl&gt; 2, 1, 3, 2, 4, 4, 1, 3, 2, 3, 2, 2, 3, …
+## $ disagreements_Q3              &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ positionalaccuracy_Q3         &lt;dbl&gt; 234, 12, 9, 12, 407, 556, 176, 299, 515…
+## $ timezone_Q3                   &lt;dbl&gt; 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ accuracyratio_Q3              &lt;dbl&gt; 2, 2, 3, 3, 5, 5, 2, 4, 3, 4, 4, 4, 4, …</code></pre>
+<pre class="r"><code>genusspecies_summary %&gt;% slice(1:10) %&gt;% kable() %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Genus
+</th>
+<th style="text-align:left;">
+Species
+</th>
+<th style="text-align:right;">
+agreements.mean
+</th>
+<th style="text-align:right;">
+disagreements.mean
+</th>
+<th style="text-align:right;">
+positionalaccuracy.mean
+</th>
+<th style="text-align:right;">
+timezone.mean
+</th>
+<th style="text-align:right;">
+accuracyratio.mean
+</th>
+<th style="text-align:right;">
+agreements.sd
+</th>
+<th style="text-align:right;">
+disagreements.sd
+</th>
+<th style="text-align:right;">
+positionalaccuracy.sd
+</th>
+<th style="text-align:right;">
+timezone.sd
+</th>
+<th style="text-align:right;">
+accuracyratio.sd
+</th>
+<th style="text-align:right;">
+agreements_n.n
+</th>
+<th style="text-align:right;">
+disagreements_n.n
+</th>
+<th style="text-align:right;">
+positionalaccuracy_n.n
+</th>
+<th style="text-align:right;">
+timezone_n.n
+</th>
+<th style="text-align:right;">
+accuracyratio_n.n
+</th>
+<th style="text-align:right;">
+agreements_n.distinct
+</th>
+<th style="text-align:right;">
+disagreements_n.distinct
+</th>
+<th style="text-align:right;">
+positionalaccuracy_n.distinct
+</th>
+<th style="text-align:right;">
+timezone_n.distinct
+</th>
+<th style="text-align:right;">
+accuracyratio_n.distinct
+</th>
+<th style="text-align:right;">
+agreements_Q1
+</th>
+<th style="text-align:right;">
+disagreements_Q1
+</th>
+<th style="text-align:right;">
+positionalaccuracy_Q1
+</th>
+<th style="text-align:right;">
+timezone_Q1
+</th>
+<th style="text-align:right;">
+accuracyratio_Q1
+</th>
+<th style="text-align:right;">
+agreements_Q3
+</th>
+<th style="text-align:right;">
+disagreements_Q3
+</th>
+<th style="text-align:right;">
+positionalaccuracy_Q3
+</th>
+<th style="text-align:right;">
+timezone_Q3
+</th>
+<th style="text-align:right;">
+accuracyratio_Q3
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Aspidimorpha
+</td>
+<td style="text-align:left;">
+sanctaecrucis
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+159
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+134
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+71
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+234
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chilocorus
+</td>
+<td style="text-align:left;">
+stigma
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+83
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+244
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+formosa
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+ocellata
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+ohlone
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+697
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1441
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+407
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+oregona
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+496
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+171
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+436
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+556
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+purpurea
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+142
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+82
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+176
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+repanda
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+380
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+896
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+299
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+scutellaris
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1139
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2374
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+515
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+sexguttata
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+449
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2690
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+76
+</td>
+<td style="text-align:right;">
+76
+</td>
+<td style="text-align:right;">
+76
+</td>
+<td style="text-align:right;">
+76
+</td>
+<td style="text-align:right;">
+76
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+85
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+splendida
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+28
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+45
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+tranquebarica
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+65
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+86
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+116
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Coccinella
+</td>
+<td style="text-align:left;">
+trifasciata
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+69
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+91
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+75
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eleodes
+</td>
+<td style="text-align:left;">
+osculans
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+38
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+63
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+25
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eleodes
+</td>
+<td style="text-align:left;">
+tricostata
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+155
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+326
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+dimidiata
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+194
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+147
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+136
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+247
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+octomaculata
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+448
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+735
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+178
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+223
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+quadripunctata
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+212
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+612
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+sedecimnotata
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+84
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+25
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+122
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+testudinaria
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+185
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+173
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hippodamia
+</td>
+<td style="text-align:left;">
+variegata
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+411
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1510
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+45
+</td>
+<td style="text-align:right;">
+45
+</td>
+<td style="text-align:right;">
+45
+</td>
+<td style="text-align:right;">
+45
+</td>
+<td style="text-align:right;">
+45
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+122
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lytta
+</td>
+<td style="text-align:left;">
+polita
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4036
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+14965
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+177
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lytta
+</td>
+<td style="text-align:left;">
+sayi
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+5828
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+6423
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3557
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+8099
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lytta
+</td>
+<td style="text-align:left;">
+stygica
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+6229
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+27377
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+802
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Neocicindela
+</td>
+<td style="text-align:left;">
+tuberculata
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+728
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2361
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+263
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicrophorus
+</td>
+<td style="text-align:left;">
+nigrita
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+27
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+28
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicrophorus
+</td>
+<td style="text-align:left;">
+orbicollis
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicrophorus
+</td>
+<td style="text-align:left;">
+tomentosus
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+62
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+43
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+78
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Oryctes
+</td>
+<td style="text-align:left;">
+rhinoceros
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+860
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1406
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1514
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Psyllobora
+</td>
+<td style="text-align:left;">
+vigintimaculata
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4125
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+9925
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+184
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="this-summary-dataset-needs-tidying-to-be-easy-to-read" class="section level3">
+<h3>This summary dataset needs tidying to be easy to read</h3>
+<pre class="r"><code>tidy_gs_summary1 &lt;- genusspecies_summary %&gt;%
+  pivot_longer(cols=c(&#39;agreements.mean&#39;:&#39;accuracyratio_Q3&#39;)) %&gt;%
+  separate(name,into=c(&quot;Variable&quot;,&quot;Statistic&quot;)) 
+tidy_gs_summary1 %&gt;% head()</code></pre>
+<pre><code>## # A tibble: 6 x 5
+## # Groups:   Genus [1]
+##   Genus        Species       Variable           Statistic value
+##   &lt;chr&gt;        &lt;chr&gt;         &lt;chr&gt;              &lt;chr&gt;     &lt;dbl&gt;
+## 1 Aspidimorpha sanctaecrucis agreements         mean          2
+## 2 Aspidimorpha sanctaecrucis disagreements      mean          0
+## 3 Aspidimorpha sanctaecrucis positionalaccuracy mean        159
+## 4 Aspidimorpha sanctaecrucis timezone           mean          0
+## 5 Aspidimorpha sanctaecrucis accuracyratio      mean          2
+## 6 Aspidimorpha sanctaecrucis agreements         sd            1</code></pre>
+<pre class="r"><code>tidy_gs_summary2 &lt;- tidy_gs_summary1%&gt;% pivot_wider(names_from=&quot;Statistic&quot;,values_from=&quot;value&quot;)
+tidy_gs_summary2 %&gt;%  slice(1:10) %&gt;% kable() %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Genus
+</th>
+<th style="text-align:left;">
+Species
+</th>
+<th style="text-align:left;">
+Variable
+</th>
+<th style="text-align:left;">
+mean
+</th>
+<th style="text-align:left;">
+sd
+</th>
+<th style="text-align:left;">
+n
+</th>
+<th style="text-align:left;">
+Q1
+</th>
+<th style="text-align:left;">
+Q3
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Aspidimorpha
+</td>
+<td style="text-align:left;">
+sanctaecrucis
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(4, 4)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Aspidimorpha
+</td>
+<td style="text-align:left;">
+sanctaecrucis
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(4, 4)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Aspidimorpha
+</td>
+<td style="text-align:left;">
+sanctaecrucis
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+159
+</td>
+<td style="text-align:left;">
+134
+</td>
+<td style="text-align:left;">
+c(4, 4)
+</td>
+<td style="text-align:left;">
+71
+</td>
+<td style="text-align:left;">
+234
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Aspidimorpha
+</td>
+<td style="text-align:left;">
+sanctaecrucis
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(4, 4)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Aspidimorpha
+</td>
+<td style="text-align:left;">
+sanctaecrucis
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(4, 4)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chilocorus
+</td>
+<td style="text-align:left;">
+stigma
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(11, 4)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chilocorus
+</td>
+<td style="text-align:left;">
+stigma
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(11, 4)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chilocorus
+</td>
+<td style="text-align:left;">
+stigma
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+83
+</td>
+<td style="text-align:left;">
+244
+</td>
+<td style="text-align:left;">
+c(11, 4)
+</td>
+<td style="text-align:left;">
+5
+</td>
+<td style="text-align:left;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chilocorus
+</td>
+<td style="text-align:left;">
+stigma
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(11, 4)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chilocorus
+</td>
+<td style="text-align:left;">
+stigma
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(11, 4)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+formosa
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(2, 12)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+formosa
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(2, 12)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+formosa
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+8
+</td>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:left;">
+c(2, 12)
+</td>
+<td style="text-align:left;">
+6
+</td>
+<td style="text-align:left;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+formosa
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(2, 12)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+formosa
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(2, 12)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+ocellata
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(3, 12)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+ocellata
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(3, 12)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+ocellata
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+10
+</td>
+<td style="text-align:left;">
+6
+</td>
+<td style="text-align:left;">
+c(3, 12)
+</td>
+<td style="text-align:left;">
+7
+</td>
+<td style="text-align:left;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+ocellata
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(3, 12)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cicindela
+</td>
+<td style="text-align:left;">
+ocellata
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(3, 12)
+</td>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Coccinella
+</td>
+<td style="text-align:left;">
+trifasciata
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(6, 4)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Coccinella
+</td>
+<td style="text-align:left;">
+trifasciata
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(6, 4)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Coccinella
+</td>
+<td style="text-align:left;">
+trifasciata
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+69
+</td>
+<td style="text-align:left;">
+91
+</td>
+<td style="text-align:left;">
+c(6, 4)
+</td>
+<td style="text-align:left;">
+10
+</td>
+<td style="text-align:left;">
+75
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Coccinella
+</td>
+<td style="text-align:left;">
+trifasciata
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(6, 4)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Coccinella
+</td>
+<td style="text-align:left;">
+trifasciata
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(6, 4)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eleodes
+</td>
+<td style="text-align:left;">
+osculans
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(6, 5)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eleodes
+</td>
+<td style="text-align:left;">
+osculans
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(6, 5)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eleodes
+</td>
+<td style="text-align:left;">
+osculans
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+38
+</td>
+<td style="text-align:left;">
+63
+</td>
+<td style="text-align:left;">
+c(6, 5)
+</td>
+<td style="text-align:left;">
+10
+</td>
+<td style="text-align:left;">
+25
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eleodes
+</td>
+<td style="text-align:left;">
+osculans
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(6, 5)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eleodes
+</td>
+<td style="text-align:left;">
+osculans
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(6, 5)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eleodes
+</td>
+<td style="text-align:left;">
+tricostata
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(5, 5)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eleodes
+</td>
+<td style="text-align:left;">
+tricostata
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(5, 5)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eleodes
+</td>
+<td style="text-align:left;">
+tricostata
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+155
+</td>
+<td style="text-align:left;">
+326
+</td>
+<td style="text-align:left;">
+c(5, 5)
+</td>
+<td style="text-align:left;">
+8
+</td>
+<td style="text-align:left;">
+15
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eleodes
+</td>
+<td style="text-align:left;">
+tricostata
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(5, 5)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eleodes
+</td>
+<td style="text-align:left;">
+tricostata
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(5, 5)
+</td>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+dimidiata
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+c(4, 8)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+dimidiata
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(4, 8)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+dimidiata
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+194
+</td>
+<td style="text-align:left;">
+147
+</td>
+<td style="text-align:left;">
+c(4, 8)
+</td>
+<td style="text-align:left;">
+136
+</td>
+<td style="text-align:left;">
+247
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+dimidiata
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(4, 8)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+dimidiata
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(4, 8)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+octomaculata
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(7, 8)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+octomaculata
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(7, 8)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+octomaculata
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+448
+</td>
+<td style="text-align:left;">
+735
+</td>
+<td style="text-align:left;">
+c(7, 8)
+</td>
+<td style="text-align:left;">
+178
+</td>
+<td style="text-align:left;">
+223
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+octomaculata
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(7, 8)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harmonia
+</td>
+<td style="text-align:left;">
+octomaculata
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(7, 8)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hippodamia
+</td>
+<td style="text-align:left;">
+variegata
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(45, 3)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hippodamia
+</td>
+<td style="text-align:left;">
+variegata
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(45, 3)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hippodamia
+</td>
+<td style="text-align:left;">
+variegata
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+411
+</td>
+<td style="text-align:left;">
+1510
+</td>
+<td style="text-align:left;">
+c(45, 3)
+</td>
+<td style="text-align:left;">
+8
+</td>
+<td style="text-align:left;">
+122
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hippodamia
+</td>
+<td style="text-align:left;">
+variegata
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(45, 3)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hippodamia
+</td>
+<td style="text-align:left;">
+variegata
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(45, 3)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lytta
+</td>
+<td style="text-align:left;">
+polita
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(15, 6)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lytta
+</td>
+<td style="text-align:left;">
+polita
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(15, 6)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lytta
+</td>
+<td style="text-align:left;">
+polita
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+4036
+</td>
+<td style="text-align:left;">
+14965
+</td>
+<td style="text-align:left;">
+c(15, 6)
+</td>
+<td style="text-align:left;">
+18
+</td>
+<td style="text-align:left;">
+177
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lytta
+</td>
+<td style="text-align:left;">
+polita
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(15, 6)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lytta
+</td>
+<td style="text-align:left;">
+polita
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(15, 6)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lytta
+</td>
+<td style="text-align:left;">
+sayi
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(2, 6)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lytta
+</td>
+<td style="text-align:left;">
+sayi
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(2, 6)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lytta
+</td>
+<td style="text-align:left;">
+sayi
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+5828
+</td>
+<td style="text-align:left;">
+6423
+</td>
+<td style="text-align:left;">
+c(2, 6)
+</td>
+<td style="text-align:left;">
+3557
+</td>
+<td style="text-align:left;">
+8099
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lytta
+</td>
+<td style="text-align:left;">
+sayi
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(2, 6)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lytta
+</td>
+<td style="text-align:left;">
+sayi
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(2, 6)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Neocicindela
+</td>
+<td style="text-align:left;">
+tuberculata
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(41, 4)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Neocicindela
+</td>
+<td style="text-align:left;">
+tuberculata
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(41, 4)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Neocicindela
+</td>
+<td style="text-align:left;">
+tuberculata
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+728
+</td>
+<td style="text-align:left;">
+2361
+</td>
+<td style="text-align:left;">
+c(41, 4)
+</td>
+<td style="text-align:left;">
+8
+</td>
+<td style="text-align:left;">
+263
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Neocicindela
+</td>
+<td style="text-align:left;">
+tuberculata
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(41, 4)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Neocicindela
+</td>
+<td style="text-align:left;">
+tuberculata
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(41, 4)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicrophorus
+</td>
+<td style="text-align:left;">
+nigrita
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(3, 4)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicrophorus
+</td>
+<td style="text-align:left;">
+nigrita
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(3, 4)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicrophorus
+</td>
+<td style="text-align:left;">
+nigrita
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+20
+</td>
+<td style="text-align:left;">
+27
+</td>
+<td style="text-align:left;">
+c(3, 4)
+</td>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:left;">
+28
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicrophorus
+</td>
+<td style="text-align:left;">
+nigrita
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(3, 4)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicrophorus
+</td>
+<td style="text-align:left;">
+nigrita
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(3, 4)
+</td>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicrophorus
+</td>
+<td style="text-align:left;">
+orbicollis
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(3, 4)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicrophorus
+</td>
+<td style="text-align:left;">
+orbicollis
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(3, 4)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicrophorus
+</td>
+<td style="text-align:left;">
+orbicollis
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+18
+</td>
+<td style="text-align:left;">
+7
+</td>
+<td style="text-align:left;">
+c(3, 4)
+</td>
+<td style="text-align:left;">
+16
+</td>
+<td style="text-align:left;">
+22
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicrophorus
+</td>
+<td style="text-align:left;">
+orbicollis
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(3, 4)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicrophorus
+</td>
+<td style="text-align:left;">
+orbicollis
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(3, 4)
+</td>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Oryctes
+</td>
+<td style="text-align:left;">
+rhinoceros
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(10, 4)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Oryctes
+</td>
+<td style="text-align:left;">
+rhinoceros
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(10, 4)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Oryctes
+</td>
+<td style="text-align:left;">
+rhinoceros
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+860
+</td>
+<td style="text-align:left;">
+1406
+</td>
+<td style="text-align:left;">
+c(10, 4)
+</td>
+<td style="text-align:left;">
+8
+</td>
+<td style="text-align:left;">
+1514
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Oryctes
+</td>
+<td style="text-align:left;">
+rhinoceros
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(10, 4)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Oryctes
+</td>
+<td style="text-align:left;">
+rhinoceros
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(10, 4)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Psyllobora
+</td>
+<td style="text-align:left;">
+vigintimaculata
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(6, 4)
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Psyllobora
+</td>
+<td style="text-align:left;">
+vigintimaculata
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+c(6, 4)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Psyllobora
+</td>
+<td style="text-align:left;">
+vigintimaculata
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:left;">
+4125
+</td>
+<td style="text-align:left;">
+9925
+</td>
+<td style="text-align:left;">
+c(6, 4)
+</td>
+<td style="text-align:left;">
+18
+</td>
+<td style="text-align:left;">
+184
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Psyllobora
+</td>
+<td style="text-align:left;">
+vigintimaculata
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(6, 4)
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Psyllobora
+</td>
+<td style="text-align:left;">
+vigintimaculata
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+c(6, 4)
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+3
+</td>
+</tr>
+</tbody>
+</table>
+<p>Now that’s a pretty dataset!</p>
+<div id="summary-of-the-dataset-grouped-by-species" class="section level4">
+<h4>Summary of the dataset grouped by Species</h4>
+<p>After looking at the summary statistics for the data, one can see that there is a higher variation in agreements by species than disagreements. For instance, the highest mean agreements is 4 and the lowest is mean agreements is 0. In disagreements Cicindela formosa has the highest number mean of disagreements of 0 with a standard deviation of 1 (this is interesting as it also has the lowest number for positional accuracy meaning that it has a more accurate location). Positional accuracy tells a different story. There is a large amount of variation within each species and this can be seen in Lytta stygica’s standard deviation of 27377 or Lytta sayi’s IQR of 4592. These two species are not outliers in this regard as many other species have standard deviations of over 1000.</p>
+</div>
+</div>
+<div id="now-i-will-create-summary-statistics-of-each-variable-by-the-location-by-time-zone-of-the-beetles." class="section level3">
+<h3>Now I will create summary statistics of each variable by the location (by time zone) of the beetles.</h3>
+</div>
+<div id="i-will-first-make-the-timezone-variable-a-character." class="section level3">
+<h3>I will first make the timezone variable a character.</h3>
+<pre class="r"><code>idbugs2 &lt;- idbugs %&gt;% mutate(timezone2=recode_factor(timezone,&quot;0&quot;=&quot;North and Central America&quot;, &quot;1&quot;=&quot;Other Continents&quot;))</code></pre>
+</div>
+</div>
+<div id="creating-summary-stats-individually-by-timezone." class="section level2">
+<h2>Creating Summary stats individually by timezone.</h2>
+<pre class="r"><code>timezone_means &lt;- idbugs2 %&gt;% 
+  group_by(timezone2) %&gt;%
+  select(-id) %&gt;% 
+  select(-num_identification_agreements1) %&gt;%
+  select(-num_identification_disagreements1) %&gt;%
+  summarize_if(is.numeric, mean, na.rm=T) %&gt;% 
+  mutate_if(is.numeric, round)
+
+timezone_sd &lt;- idbugs2 %&gt;% 
+  group_by(timezone2) %&gt;% 
+  select(-id) %&gt;% 
+  select(-num_identification_agreements1) %&gt;% 
+  select(-num_identification_disagreements1) %&gt;%
+  summarize_if(is.numeric, sd, na.rm=T) %&gt;% 
+  mutate_if(is.numeric, round)
+
+timezone.n &lt;- idbugs2 %&gt;% 
+  group_by(timezone2) %&gt;% 
+  select(-id) %&gt;% 
+  select(-num_identification_agreements1) %&gt;% 
+  select(-num_identification_disagreements1) %&gt;%
+  summarize_if(is.numeric, funs(n = n())) %&gt;% 
+  mutate_if(is.numeric, round)
+
+timezone.distinct &lt;- idbugs2 %&gt;% 
+  group_by(timezone2) %&gt;% 
+  select(-id) %&gt;% 
+  select(-num_identification_agreements1) %&gt;% 
+  select(-num_identification_disagreements1) %&gt;%
+  summarize_if(is.numeric, n_distinct) %&gt;% 
+  mutate_if(is.numeric, round)
+
+timezone.Q3 &lt;- idbugs2 %&gt;% 
+  group_by(timezone2) %&gt;% 
+  select(-id) %&gt;% 
+  select(-num_identification_agreements1) %&gt;% 
+  select(-num_identification_disagreements1) %&gt;%
+  summarize_if(is.numeric, list(Q3=quantile), probs=.75, na.rm=T) %&gt;% 
+  mutate_if(is.numeric, round)
+
+timezone.Q1 &lt;- idbugs2 %&gt;% 
+  group_by(timezone2) %&gt;% 
+  select(-id) %&gt;% 
+  select(-num_identification_agreements1) %&gt;% 
+  select(-num_identification_disagreements1) %&gt;%
+  summarize_if(is.numeric, list(Q1=quantile), probs=.25, na.rm=T) %&gt;% 
+  mutate_if(is.numeric, round)</code></pre>
+<div id="combining-all-of-these-summary-stats-1" class="section level3">
+<h3>Combining all of these summary stats</h3>
+<pre class="r"><code>timezone_m_sd &lt;- left_join(timezone_means, timezone_sd, by=&quot;timezone2&quot;, suffix=c(&quot;.mean&quot;,&quot;.sd&quot;))
+timezone_n_dist &lt;- left_join(timezone.n, timezone.distinct, by=&quot;timezone2&quot;, suffix=c(&quot;.n&quot;,&quot;.distinct&quot;))
+timezone_Q1_Q3 &lt;- left_join(timezone.Q1, timezone.Q3, by=&quot;timezone2&quot;, suffix=c(&quot;.Q1&quot;,&quot;.Q3&quot;))
+
+timezone_summary &lt;- timezone_m_sd %&gt;% full_join(timezone_n_dist) %&gt;% full_join(timezone_Q1_Q3)</code></pre>
+</div>
+<div id="removing-the-na-rows-and-columns-from-genusspecies_summary-1" class="section level3">
+<h3>Removing the N/A rows and columns from genusspecies_summary</h3>
+<pre class="r"><code>glimpse(timezone_summary)</code></pre>
+<pre><code>## Observations: 2
+## Variables: 31
+## $ timezone2               &lt;fct&gt; North and Central America, Other Continents
+## $ agreements.mean         &lt;dbl&gt; 2, 2
+## $ disagreements.mean      &lt;dbl&gt; 0, 0
+## $ positionalaccuracy.mean &lt;dbl&gt; 4259, 4705
+## $ timezone.mean           &lt;dbl&gt; 0, 1
+## $ accuracyratio.mean      &lt;dbl&gt; 3, 3
+## $ agreements.sd           &lt;dbl&gt; 1, 1
+## $ disagreements.sd        &lt;dbl&gt; 0, 0
+## $ positionalaccuracy.sd   &lt;dbl&gt; 90777, 84182
+## $ timezone.sd             &lt;dbl&gt; 0, 0
+## $ accuracyratio.sd        &lt;dbl&gt; 1, 1
+## $ agreements_n            &lt;dbl&gt; 2083, 1860
+## $ disagreements_n         &lt;dbl&gt; 2083, 1860
+## $ positionalaccuracy_n    &lt;dbl&gt; 2083, 1860
+## $ timezone_n              &lt;dbl&gt; 2083, 1860
+## $ accuracyratio_n         &lt;dbl&gt; 2083, 1860
+## $ agreements              &lt;dbl&gt; 6, 9
+## $ disagreements           &lt;dbl&gt; 2, 3
+## $ positionalaccuracy      &lt;dbl&gt; 401, 353
+## $ timezone                &lt;dbl&gt; 1, 1
+## $ accuracyratio           &lt;dbl&gt; 8, 11
+## $ agreements_Q1           &lt;dbl&gt; 1, 1
+## $ disagreements_Q1        &lt;dbl&gt; 0, 0
+## $ positionalaccuracy_Q1   &lt;dbl&gt; 6, 8
+## $ timezone_Q1             &lt;dbl&gt; 0, 1
+## $ accuracyratio_Q1        &lt;dbl&gt; 2, 2
+## $ agreements_Q3           &lt;dbl&gt; 2, 2
+## $ disagreements_Q3        &lt;dbl&gt; 0, 0
+## $ positionalaccuracy_Q3   &lt;dbl&gt; 100, 140
+## $ timezone_Q3             &lt;dbl&gt; 0, 1
+## $ accuracyratio_Q3        &lt;dbl&gt; 3, 3</code></pre>
+<pre class="r"><code>timezone_summary &lt;- timezone_summary %&gt;% na.omit()
+
+timezone_summary &lt;- timezone_summary %&gt;% select(-agreements, -disagreements, -positionalaccuracy,  -accuracyratio ) %&gt;% na.omit() 
+
+glimpse(timezone_summary)</code></pre>
+<pre><code>## Observations: 2
+## Variables: 27
+## $ timezone2               &lt;fct&gt; North and Central America, Other Continents
+## $ agreements.mean         &lt;dbl&gt; 2, 2
+## $ disagreements.mean      &lt;dbl&gt; 0, 0
+## $ positionalaccuracy.mean &lt;dbl&gt; 4259, 4705
+## $ timezone.mean           &lt;dbl&gt; 0, 1
+## $ accuracyratio.mean      &lt;dbl&gt; 3, 3
+## $ agreements.sd           &lt;dbl&gt; 1, 1
+## $ disagreements.sd        &lt;dbl&gt; 0, 0
+## $ positionalaccuracy.sd   &lt;dbl&gt; 90777, 84182
+## $ timezone.sd             &lt;dbl&gt; 0, 0
+## $ accuracyratio.sd        &lt;dbl&gt; 1, 1
+## $ agreements_n            &lt;dbl&gt; 2083, 1860
+## $ disagreements_n         &lt;dbl&gt; 2083, 1860
+## $ positionalaccuracy_n    &lt;dbl&gt; 2083, 1860
+## $ timezone_n              &lt;dbl&gt; 2083, 1860
+## $ accuracyratio_n         &lt;dbl&gt; 2083, 1860
+## $ timezone                &lt;dbl&gt; 1, 1
+## $ agreements_Q1           &lt;dbl&gt; 1, 1
+## $ disagreements_Q1        &lt;dbl&gt; 0, 0
+## $ positionalaccuracy_Q1   &lt;dbl&gt; 6, 8
+## $ timezone_Q1             &lt;dbl&gt; 0, 1
+## $ accuracyratio_Q1        &lt;dbl&gt; 2, 2
+## $ agreements_Q3           &lt;dbl&gt; 2, 2
+## $ disagreements_Q3        &lt;dbl&gt; 0, 0
+## $ positionalaccuracy_Q3   &lt;dbl&gt; 100, 140
+## $ timezone_Q3             &lt;dbl&gt; 0, 1
+## $ accuracyratio_Q3        &lt;dbl&gt; 3, 3</code></pre>
+</div>
+<div id="this-is-the-completed-summary-dataset-1" class="section level3">
+<h3>This is the completed summary dataset</h3>
+<pre class="r"><code>glimpse(timezone_summary)</code></pre>
+<pre><code>## Observations: 2
+## Variables: 27
+## $ timezone2               &lt;fct&gt; North and Central America, Other Continents
+## $ agreements.mean         &lt;dbl&gt; 2, 2
+## $ disagreements.mean      &lt;dbl&gt; 0, 0
+## $ positionalaccuracy.mean &lt;dbl&gt; 4259, 4705
+## $ timezone.mean           &lt;dbl&gt; 0, 1
+## $ accuracyratio.mean      &lt;dbl&gt; 3, 3
+## $ agreements.sd           &lt;dbl&gt; 1, 1
+## $ disagreements.sd        &lt;dbl&gt; 0, 0
+## $ positionalaccuracy.sd   &lt;dbl&gt; 90777, 84182
+## $ timezone.sd             &lt;dbl&gt; 0, 0
+## $ accuracyratio.sd        &lt;dbl&gt; 1, 1
+## $ agreements_n            &lt;dbl&gt; 2083, 1860
+## $ disagreements_n         &lt;dbl&gt; 2083, 1860
+## $ positionalaccuracy_n    &lt;dbl&gt; 2083, 1860
+## $ timezone_n              &lt;dbl&gt; 2083, 1860
+## $ accuracyratio_n         &lt;dbl&gt; 2083, 1860
+## $ timezone                &lt;dbl&gt; 1, 1
+## $ agreements_Q1           &lt;dbl&gt; 1, 1
+## $ disagreements_Q1        &lt;dbl&gt; 0, 0
+## $ positionalaccuracy_Q1   &lt;dbl&gt; 6, 8
+## $ timezone_Q1             &lt;dbl&gt; 0, 1
+## $ accuracyratio_Q1        &lt;dbl&gt; 2, 2
+## $ agreements_Q3           &lt;dbl&gt; 2, 2
+## $ disagreements_Q3        &lt;dbl&gt; 0, 0
+## $ positionalaccuracy_Q3   &lt;dbl&gt; 100, 140
+## $ timezone_Q3             &lt;dbl&gt; 0, 1
+## $ accuracyratio_Q3        &lt;dbl&gt; 3, 3</code></pre>
+<pre class="r"><code>timezone_summary %&gt;% slice(1:10) %&gt;% kable() %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+timezone2
+</th>
+<th style="text-align:right;">
+agreements.mean
+</th>
+<th style="text-align:right;">
+disagreements.mean
+</th>
+<th style="text-align:right;">
+positionalaccuracy.mean
+</th>
+<th style="text-align:right;">
+timezone.mean
+</th>
+<th style="text-align:right;">
+accuracyratio.mean
+</th>
+<th style="text-align:right;">
+agreements.sd
+</th>
+<th style="text-align:right;">
+disagreements.sd
+</th>
+<th style="text-align:right;">
+positionalaccuracy.sd
+</th>
+<th style="text-align:right;">
+timezone.sd
+</th>
+<th style="text-align:right;">
+accuracyratio.sd
+</th>
+<th style="text-align:right;">
+agreements_n
+</th>
+<th style="text-align:right;">
+disagreements_n
+</th>
+<th style="text-align:right;">
+positionalaccuracy_n
+</th>
+<th style="text-align:right;">
+timezone_n
+</th>
+<th style="text-align:right;">
+accuracyratio_n
+</th>
+<th style="text-align:right;">
+timezone
+</th>
+<th style="text-align:right;">
+agreements_Q1
+</th>
+<th style="text-align:right;">
+disagreements_Q1
+</th>
+<th style="text-align:right;">
+positionalaccuracy_Q1
+</th>
+<th style="text-align:right;">
+timezone_Q1
+</th>
+<th style="text-align:right;">
+accuracyratio_Q1
+</th>
+<th style="text-align:right;">
+agreements_Q3
+</th>
+<th style="text-align:right;">
+disagreements_Q3
+</th>
+<th style="text-align:right;">
+positionalaccuracy_Q3
+</th>
+<th style="text-align:right;">
+timezone_Q3
+</th>
+<th style="text-align:right;">
+accuracyratio_Q3
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+North and Central America
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4259
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+90777
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2083
+</td>
+<td style="text-align:right;">
+2083
+</td>
+<td style="text-align:right;">
+2083
+</td>
+<td style="text-align:right;">
+2083
+</td>
+<td style="text-align:right;">
+2083
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Other Continents
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4705
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+84182
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1860
+</td>
+<td style="text-align:right;">
+1860
+</td>
+<td style="text-align:right;">
+1860
+</td>
+<td style="text-align:right;">
+1860
+</td>
+<td style="text-align:right;">
+1860
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+140
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="this-summary-dataset-needs-tidying-to-be-easy-to-read-1" class="section level3">
+<h3>This summary dataset needs tidying to be easy to read</h3>
+<pre class="r"><code>tidy_timezone_summary &lt;- timezone_summary %&gt;%
+  pivot_longer(cols=c(&#39;agreements.mean&#39;:&#39;accuracyratio_Q3&#39;)) %&gt;%
+  separate(name,into=c(&quot;Variable&quot;,&quot;Statistic&quot;)) %&gt;%
+  pivot_wider(names_from=&quot;Statistic&quot;,values_from=&quot;value&quot;) %&gt;%
+  select(-&quot;NA&quot;)
+
+tidy_timezone_summary %&gt;% slice(1:10) %&gt;% kable() %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+timezone2
+</th>
+<th style="text-align:left;">
+Variable
+</th>
+<th style="text-align:right;">
+mean
+</th>
+<th style="text-align:right;">
+sd
+</th>
+<th style="text-align:right;">
+n
+</th>
+<th style="text-align:right;">
+Q1
+</th>
+<th style="text-align:right;">
+Q3
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+North and Central America
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2083
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+North and Central America
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2083
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+North and Central America
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:right;">
+4259
+</td>
+<td style="text-align:right;">
+90777
+</td>
+<td style="text-align:right;">
+2083
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+100
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+North and Central America
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2083
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+North and Central America
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2083
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Other Continents
+</td>
+<td style="text-align:left;">
+agreements
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1860
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Other Continents
+</td>
+<td style="text-align:left;">
+disagreements
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1860
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Other Continents
+</td>
+<td style="text-align:left;">
+positionalaccuracy
+</td>
+<td style="text-align:right;">
+4705
+</td>
+<td style="text-align:right;">
+84182
+</td>
+<td style="text-align:right;">
+1860
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+140
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Other Continents
+</td>
+<td style="text-align:left;">
+timezone
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1860
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Other Continents
+</td>
+<td style="text-align:left;">
+accuracyratio
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1860
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+</tbody>
+</table>
+<p>Now that’s a pretty dataset!</p>
+<div id="summary-of-the-dataset-when-grouped-by-timezone" class="section level4">
+<h4>Summary of the dataset when grouped by Timezone</h4>
+<p>After looking at the summary statistics for the data separated by timezone, one can see that the largest difference in the datasets are the number of observations (N/CA: n=2083, OC: n=1860). There is no difference in the agreements, disagreements and identification accuracy ratio between the two groups. There is a slight difference in the positional accuracy between timezone categories. It appears that there is a lower mean for positional accuracy in other continents (lower numbers mean greater accuracy) as well as a lower variability (N/CA: sd=90777, OC: sd=84182), this is not reflected in the IQR which means there is likely a skew in positional accuracy for other continents (N/CA: IQR=94, OC: IQR=132)</p>
+</div>
+</div>
+</div>
+<div id="visualizations" class="section level2">
+<h2>Visualizations</h2>
+<div id="correlation-heatmap" class="section level3">
+<h3>Correlation Heatmap</h3>
+<pre class="r"><code>complete_cor_bugs &lt;- cor_idbugs %&gt;% as.data.frame %&gt;%
+rownames_to_column %&gt;%
+pivot_longer(-1,names_to=&quot;name&quot;,values_to=&quot;correlation&quot;)
+
+complete_cor_bugs %&gt;%
+  ggplot(aes(rowname,name,fill=correlation)) +
+  geom_tile() +
+  scale_fill_gradient2(low=&quot;red&quot;,mid=&quot;purple&quot;,high=&quot;blue&quot;) +
+  geom_text(aes(label=round(correlation,2)),color = &quot;black&quot;, size = 4) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  coord_fixed() +ggtitle(&quot;Correlation Heatmap&quot;) + ylab(&quot;Numeric Variables&quot;) + xlab(&quot;Numeric Variables&quot;)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-35-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>After creating the correlation heatmap comparing my numeric variables (these include: id agreements, id disagreements, overall accuracy of identification, positional accuracy, and time zone/location estimate), it appears there is no strong correlation between any of the variables. My initial questions of relation between id accuracy ratio and location (timezone) and the relationship between disagreements and positional accuracy could be answered with this data in that there is little to no relationship between these variables.</p>
+</div>
+<div id="number-of-disagreements-by-positional-accuracy-and-faceted-location-timezone-estimate" class="section level3">
+<h3>Number of Disagreements by Positional Accuracy and faceted Location (timezone estimate)</h3>
+<pre class="r"><code>ggplot(idbugs2, aes(disagreements, positionalaccuracy)) + 
+  geom_point(aes(color=taxon_family_name)) + 
+  ggtitle(&quot;Number of Disagreements by Positional Accuracy and faceted Location (timezone)&quot;)+
+  xlab(&quot;Number of Disagreements in ID&quot;) + ylab(&quot;Positional Accuracy&quot;) + facet_wrap( ~ timezone2 ) + 
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-36-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>After creating this scatterplot that compares positional accuracy and number of disagreements while faceting by location (time zone estimate), not much information can be drawn from the results. It appears that most of the data has zero disagreements no matter the positional accuracy rating. In addition, there seems to be a slightly higher range in the number of disagreements among observations from non-North American continents while there is a higher range in positional accuracy. These discrepancies could be attributed to outliers.</p>
+</div>
+<div id="agreements-and-disagreements-by-location-timezone-estimate" class="section level3">
+<h3>Agreements and Disagreements by Location (timezone estimate)</h3>
+<pre class="r"><code>ggplot(idbugs2, aes(x = disagreements, y = agreements, fill=timezone2))+
+  geom_bar(stat=&quot;summary&quot;,fun.y=&quot;mean&quot;, position=&quot;dodge&quot;)+
+  geom_errorbar(stat=&quot;summary&quot;,position=&quot;dodge&quot;) +
+  ggtitle(&quot;Agreements and Disagreements by Location (timezone estimate)&quot;) +
+  xlab(&quot;Number of Disagreements&quot;) + ylab(&quot;Number of Agreements&quot;) + scale_y_continuous(breaks=seq(0, 5, 1)) + scale_x_continuous(breaks=seq(0,2,1))</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-37-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>After creating this bar chart which compares the number of disagreements and agreements in identification between locations (time zone estimates), a few trends can be observed. It appears that observations outside of North and Central America have higher mean agreements and disagreements overall. Other continents are the only location group to have a mean of 2 disagreements and a mean of more than 5 agreements. This suggests that there is more identification discussion amongst groups from outside of North America.</p>
+</div>
+</div>
+<div id="dimensionality-reduction-using-pca" class="section level2">
+<h2>Dimensionality Reduction using PCA</h2>
+<p>For this dataset, it was a better idea to use PAM clustering with gower as some of the most important variables in this dataset are categorical (Family, Genus, Species, Location (timezone2)). The following are the steps and code used to create this clustering.</p>
+<div id="using-gower-to-implement-categorical-variables-in-the-clustering-of-the-data." class="section level3">
+<h3>Using gower to implement categorical variables in the clustering of the data.</h3>
+<div id="converting-useful-categorical-variables-into-factor-to-allow-for-clustering" class="section level4">
+<h4>Converting useful categorical variables into factor to allow for clustering</h4>
+<pre class="r"><code>idbugs3&lt;-idbugs2 %&gt;%
+  select(-id,-time_zone,-observed_on,-description, -quality_grade, -captive_cultivated, -place_guess, -coordinates, -species_guess, -scientific_name, -common_name, -timezone, -num_identification_agreements1, -num_identification_disagreements1) %&gt;%
+  mutate_if(is.character,as.factor)</code></pre>
+</div>
+</div>
+<div id="creating-clusters-using-gower" class="section level3">
+<h3>Creating clusters using gower</h3>
+<pre class="r"><code>gower1&lt;-daisy(idbugs3,metric=&quot;gower&quot;) %&gt;% scale</code></pre>
+</div>
+<div id="creating-a-silhouette-plot-to-determine-how-many-clusters-should-be-used-with-pam" class="section level3">
+<h3>Creating a silhouette plot to determine how many clusters should be used with pam</h3>
+<pre class="r"><code>sil_width&lt;-vector()
+for(i in 2:10){
+pam_fit &lt;- pam(gower1, diss = TRUE, k = i)
+sil_width[i] &lt;- pam_fit$silinfo$avg.width
+} 
+ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name=&quot;k&quot;,breaks=1:10)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-40-1.png" width="672" style="display: block; margin: auto;" />
+<em>After looking at the plot, it appears the most useful number of clusters is 2 clusters as it has the highest peak on the plot.</em></p>
+</div>
+<div id="creating-2-clusters-using-pam" class="section level3">
+<h3>Creating 2 clusters using PAM</h3>
+<pre class="r"><code>pam1&lt;-pam(gower1,k=2,diss=T)
+pam_idbugs&lt;-idbugs3%&gt;%mutate(cluster=as.factor(pam1$clustering))</code></pre>
+</div>
+<div id="view-of-clusters" class="section level3">
+<h3>View of clusters</h3>
+<pre class="r"><code>table&lt;-pam_idbugs%&gt;%group_by(timezone2)%&gt;%count(cluster)%&gt;%arrange(desc(n))%&gt;%
+pivot_wider(names_from=&quot;cluster&quot;,values_from=&quot;n&quot;,values_fill = list(&#39;n&#39;=0))
+table</code></pre>
+<pre><code>## # A tibble: 2 x 3
+## # Groups:   timezone2 [2]
+##   timezone2                   `2`   `1`
+##   &lt;fct&gt;                     &lt;int&gt; &lt;int&gt;
+## 1 North and Central America  1869   214
+## 2 Other Continents            428  1432</code></pre>
+<p><em>Clusters fit well for time zone</em></p>
+</div>
+<div id="ggpairs-was-not-compatible-with-my-data-so-i-created-two-plots-which-compare-my-cluster-accuracy-amongst-my-numeric-variables" class="section level3">
+<h3>GGpairs was not compatible with my data so I created two plots which compare my cluster accuracy amongst my numeric variables**</h3>
+<pre class="r"><code>ggplot(pam_idbugs, aes(x=positionalaccuracy,y=disagreements, color=cluster))+
+  geom_point()+
+  ggtitle(&quot;Clustering by Positional Accuracy and ID Disagreements&quot;) +
+  xlab(&quot;Positional Accuracy&quot;) +ylab(&quot;ID Disagreements&quot;)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-43-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(pam_idbugs, aes(x=timezone2,y=accuracyratio, color=cluster)) +
+  geom_point() +
+  ggtitle(&quot;Clustering by Location (time zone estimate) and ID Accuracy Ratio&quot;) +
+  xlab(&quot;Location (Time zone estimate)&quot;) + ylab(&quot;ID Accuracy Ratio&quot;)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-43-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="average-silhouette-length" class="section level3">
+<h3>Average silhouette length</h3>
+<pre class="r"><code>pam1$silinfo$avg.width </code></pre>
+<pre><code>## [1] 0.7435828</code></pre>
+<div id="i-used-pam-with-gower-to-cluster-this-dataset.-there-is-only-a-distinct-clustering-of-the-data-for-the-time-zonelocation-variableas-calculated-using-a-silhouette-plot-to-determine-the-right-number-of-clusters.-this-is-likely-due-to-the-fact-that-the-time-zonelocation-variable-is-split-between-two-possible-values-as-it-is.-even-so-the-observations-in-cluster-one-tend-to-be-observations-from-other-continents-and-the-observations-from-cluster-2-tend-to-be-from-northcentral-america.-the-other-variables-such-as-id-accuracy-ratio-family-genus-and-species-do-not-show-any-trends-in-the-clustering.-despite-all-of-this-the-average-silhouette-length-is-rather-large-at-.74-but-from-looking-at-the-graphs-it-is-clear-that-these-clusters-do-not-fit-the-data-very-well." class="section level4">
+<h4>I used PAM with gower to cluster this dataset. There is only a distinct clustering of the data for the time zone/location variable(as calculated using a silhouette plot to determine the right number of clusters). This is likely due to the fact that the time zone/location variable is split between two possible values as it is. Even so, the observations in cluster one tend to be observations from other continents and the observations from cluster 2 tend to be from North/Central America. The other variables such as id accuracy ratio, family, genus, and species do not show any trends in the clustering. Despite all of this, the average silhouette length is rather large at .74 but from looking at the graphs, it is clear that these clusters do not fit the data very well.</h4>
+</div>
+</div>
+</div>
+</div>
+
+              <hr>
+              <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div>
+            </div>
+          </div>
+          <hr>
+        <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+        </div>
+      </div>
+      
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

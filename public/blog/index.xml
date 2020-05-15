@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blogs on Portfolio</title>
+    <link>/blog/</link>
+    <description>Recent content in Blogs on Portfolio</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Fri, 15 May 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Python Time</title>
+      <link>/blog/python-time/</link>
+      <pubDate>Fri, 15 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/python-time/</guid>
+      <description>After taking this computational biology course, I have learned a number of ways to use both R and Python for data science. One of the most interesting things i’ve learned is how to make R and Python work together to manipulate list variables. I will now demonstrate how to create, sort, and combine lists in python and then manipulate the combined list in R to create a working dataset.  Before I can begin working with Python in Rstudio, I must load in the required packages as well as the data “skulls” #R #install.</description>
+    </item>
+    
+  </channel>
+</rss>

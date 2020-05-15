@@ -1,0 +1,22 @@
+{{ partial "head" . }}
+  <body>
+    <div id="wrap">
+      {{ partial "header" . }}
+      <section id="about">
+        <div class="container">
+        <div class="avatar">
+          <img class="img-circle" src="{{ .Site.BaseURL }}img/{{ .Site.Params.avatar }}" alt="Responsive image">
+        </div>
+        <h3>I'm <strong>{{ .Site.Params.author }}</strong>, a Senior Anthropology student at the University of Texasat Austin.</h3>
+        <h3>My area of study is archaeology and I am particularly interested in the prehistoric period of the Americas.</h3> 
+        <h3> While my main focus is in archaeology, I also enjoy learning about statistics and other data sciences and their applications to my field.<h3>
+        <h3>Here are a few of my data science oriented <a href="{{ .Site.BaseURL }}projects/"> projects</a>.</h3>
+        <h3>For more information, check out my academic &amp; professional <a href="resume.pdf" target="_blank">resume</a>.</h3>
+        <h3>Contact me via <a href="mailto:{{ .Site.Params.Social.Email }}">email</a>.</h3>
+        {{ partial "social.html" . }}
+        </div>
+      </section>
+    </div>
+    {{ partial "footer" . }}
+  </body>
+</html>
