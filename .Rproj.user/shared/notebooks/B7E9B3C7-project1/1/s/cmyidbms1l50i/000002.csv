@@ -1,0 +1,8 @@
+"0","```r
+sil_width<-vector()
+for(i in 2:10){
+pam_fit <- pam(gower1, diss = TRUE, k = i)
+sil_width[i] <- pam_fit$silinfo$avg.width
+} 
+ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name=\"k\",breaks=1:10)
+```"

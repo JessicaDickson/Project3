@@ -1,0 +1,6 @@
+"0","#R"
+"0","library(tidyverse)"
+"0","library(dplyr)"
+"0",""
+"0","#Finding the averages, max, and mean in R now"
+"0","shelter %>% group_by(animal) %>% summarise(avg=mean(time))"

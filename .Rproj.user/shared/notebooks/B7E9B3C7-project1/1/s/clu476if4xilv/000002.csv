@@ -1,0 +1,26 @@
+"0","```r
+idbugs <- idbugs %>% 
+  mutate(timezone=case_when(time_zone %in% 
+                              c(\"Eastern Time (US & Canada)\",\"Central Time (US & Canada)\", \"Hawaii\",	
+                                \"Pacific Time (US & Canada)\",\"Mountain Time (US & Canada)\", \"Arizona\", 
+                                \"Alaska\", \"America/Los_Angeles\", \"America/New_York\") ~ 0, 
+                            time_zone %in% c(\"Quito\", \"Brisbane\", \"Nuku'alofaAsia/Magadan\", \"Wellington\", 
+                                             \"Australia/Perth\", \"Mid-Atlantic\", \"Europe/London\",\"Jerusalem\", 
+                                             \"Amsterdam\",\"Africa/Johannesburg\", \"Chennai\", \"UTC\", \"Osaka\", 
+                                             \"Paris\", \"Sydney\", \"Santiago\", \"Bangkok\", \"Samoa\", \"Baghdad\", 
+                                             \"West Central Africa\", \"Pretoria\", \"Singapore\", \"Athens\", 
+                                             \"Ekaterinburg\", \"Hong Kong\", \"Almaty\", \"Vienna\", 
+                                             \"Central America\", \"Buenos Aires\", \"London\", \"Lima\", \"Brasilia\", 
+                                             \"Jakarta\", \"Bogota\", \"Kuala Lumpur\",\"Auckland\", \"Perth\", 
+                                             \"Casablanca\", \"Adelaide\", \"Mexico City\", \"Melbourne\", \"Rome\", 
+                                             \"Kyiv\", \"Stockholm\", \"Nairobi\", \"Taipei\", \"Berlin\", \"Madrid\", 
+                                             \"Atlantic Time (Canada)\", \"Beijing\", \"Prague\", \"Tijuana\", 
+                                             \"Edinburgh\", \"Montevideo\", \"Copenhagen\", \"Lisbon\", \"Abu Dhabi\", 
+                                             \"Bern\", \"Belgrade\", \"Monterrey\", \"Mazatlan\", \"La Paz\", \"Brussels\",
+                                             \"Guadalajara\", \"Istanbul\", \"Hobart\", \"Pacific/Majuro\", \"Moscow\", 
+                                             \"Yerevan\", \"Vilnius\", \"New Delhi\", \"Tokyo\", \"Zagreb\", \"Sofia\", 
+                                             \"Seoul\", \"Ljubljana\", \"Sri Jayawardenepura\", \"Warsaw\", 
+                                             \"Bucharest\", \"Bratislava\", \"Chihuahua\", 
+                                             \"Atlantic/Cape_Verde\" ,\"Islamabad\", \"American Samoa\", 
+                                             \"Cairo\") ~ 1)) %>% na.omit() %>% glimpse()
+```"

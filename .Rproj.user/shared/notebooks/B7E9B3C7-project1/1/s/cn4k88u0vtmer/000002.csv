@@ -1,0 +1,11 @@
+"0","```r
+ggplot(pam_idbugs, aes(x=positionalaccuracy,y=disagreements, color=cluster))+
+  geom_point()+
+  ggtitle(\"Clustering by Positional Accuracy and ID Disagreements\") +
+  xlab(\"Positional Accuracy\") +ylab(\"ID Disagreements\")
+
+ggplot(pam_idbugs, aes(x=timezone2,y=accuracyratio, color=cluster)) +
+  geom_point() +
+  ggtitle(\"Clustering by Location (time zone estimate) and ID Accuracy Ratio\") +
+  xlab(\"Location (Time zone estimate)\") + ylab(\"ID Accuracy Ratio\")
+```"

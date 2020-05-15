@@ -1,7 +1,7 @@
 ---
 title: "Project 2 - Ancient Egyptian Skulls"
 author: "Sloan Dickson (JSD2385)"
-date: '4-26-2020'
+date: "4-26-2020"
 output:
   html_document:
     df_print: paged

@@ -1,0 +1,4 @@
+"0","```r
+beetles2 <- world_beetles %>% select(id, time_zone, observed_on, description,quality_grade, num_identification_agreements, num_identification_disagreements, captive_cultivated, place_guess, latitude, longitude, positional_accuracy, species_guess, scientific_name, common_name, taxon_order_name, taxon_family_name, taxon_species_name)
+usa2 <- usa_insects %>% select(id, time_zone, observed_on, description,quality_grade, num_identification_agreements, num_identification_disagreements, captive_cultivated, place_guess, latitude, longitude, positional_accuracy, species_guess, scientific_name, common_name, taxon_order_name, taxon_family_name, taxon_species_name)
+```"

@@ -1,0 +1,8 @@
+"0","```r
+glimpse(timezone_summary)
+timezone_summary <- timezone_summary %>% na.omit()
+
+timezone_summary <- timezone_summary %>% select(-agreements, -disagreements, -positionalaccuracy,  -accuracyratio ) %>% na.omit() 
+
+glimpse(timezone_summary)
+```"

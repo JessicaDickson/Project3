@@ -1,0 +1,11 @@
+"0","```r
+
+tidy_gs_summary1 <- genusspecies_summary %>%
+  pivot_longer(cols=c('agreements.mean':'accuracyratio_Q3')) %>%
+  separate(name,into=c(\"Variable\",\"Statistic\")) 
+tidy_gs_summary1 %>% head()
+tidy_gs_summary2 <- tidy_gs_summary1%>% pivot_wider(names_from=\"Statistic\",values_from=\"value\")
+tidy_gs_summary2 %>%  slice(1:10) %>% kable() %>%
+  kable_styling(bootstrap_options = c(\"striped\", \"hover\", \"condensed\"))
+
+```"

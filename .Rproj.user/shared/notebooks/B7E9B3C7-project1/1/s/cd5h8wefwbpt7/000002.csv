@@ -1,0 +1,5 @@
+"0","```r
+table<-pam_idbugs%>%group_by(timezone2)%>%count(cluster)%>%arrange(desc(n))%>%
+pivot_wider(names_from=\"cluster\",values_from=\"n\",values_fill = list('n'=0))
+table
+```"

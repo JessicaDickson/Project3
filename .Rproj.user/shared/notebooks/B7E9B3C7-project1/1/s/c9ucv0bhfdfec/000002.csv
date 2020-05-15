@@ -1,0 +1,4 @@
+"0","```r
+pam1<-pam(gower1,k=2,diss=T)
+pam_idbugs<-idbugs3%>%mutate(cluster=as.factor(pam1$clustering))
+```"

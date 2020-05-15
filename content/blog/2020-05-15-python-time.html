@@ -1,6 +1,6 @@
 ---
 title: "Python Time"
-author: ''
+author: "Sloan Dickson"
 date: '2020-05-15'
 description: ''
 slug: python-time
@@ -10,7 +10,7 @@ categories: []
 
 
 
-<p><img src="static/blog/2020-05-15-python-time_files/dogcat.png" /></p>
+<p><img src="static/blog/2020-05-15-python-time_files/dogcat.png" style="width:100.0%;height:100.0%" /></p>
 <div id="after-taking-this-computational-biology-course-i-have-learned-a-number-of-ways-to-use-both-r-and-python-for-data-science.-one-of-the-most-interesting-things-ive-learned-is-how-to-make-r-and-python-work-together-to-manipulate-list-variables.-i-will-now-demonstrate-how-to-create-sort-and-combine-lists-in-python-and-then-manipulate-the-combined-list-in-r-to-create-a-working-dataset." class="section level4">
 <h4>After taking this computational biology course, I have learned a number of ways to use both R and Python for data science. One of the most interesting things i’ve learned is how to make R and Python work together to manipulate list variables. I will now demonstrate how to create, sort, and combine lists in python and then manipulate the combined list in R to create a working dataset.</h4>
 </div>
@@ -21,14 +21,13 @@ categories: []
 #install.packages(&quot;reticulate&quot;)
 #install_miniconda()
 library(reticulate)
-use_python(&quot;/usr/local/bin/python&quot;)</code></pre>
+Sys.setenv(RETICULATE_PYTHON = &quot;/usr/bin/python&quot;)
+use_python(&quot;usr/bin/python&quot;)</code></pre>
 </div>
 <div id="creating-two-variables" class="section level3">
 <h3>Creating two variables</h3>
 <p>Creating variables for the amount of time each animal spends in the shelter and whether they are a cat or dog.</p>
 <pre class="python"><code>#Python
-
-import numpy as np
 
 #Time in shelter for each cat (in months)
 cattime = [2, 6, 2, 8, 7, 5, 3, 4, 4]
@@ -146,4 +145,14 @@ shelter %&gt;% group_by(animal) %&gt;% summarise(avg=mean(time))</code></pre>
 ##   &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt;
 ## 1 cat        2     8
 ## 2 dog        1     6</code></pre>
+</div>
+<div id="a-little-fun-with-linear-regression" class="section level3">
+<h3>A Little fun with linear regression</h3>
+<pre class="r"><code>#now that we&#39;ve manipulated the data in both python and r and imported it to r. 
+
+fit1&lt;-lm(dist~speed, data=cars) #syntax for simple linear regression
+coef(fit1)</code></pre>
+<pre><code>## (Intercept)       speed 
+##  -17.579095    3.932409</code></pre>
+<p>This shows the many possibilities of combining r and</p>
 </div>

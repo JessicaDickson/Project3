@@ -575,7 +575,7 @@ mean(sample_[sample_$timechar==&quot;BCE&quot;,]$mb)}
 
 #Calculating the p-value for the likelihood that once could get this result by chance.
 mean(random_dist&gt;2.741667 | random_dist&lt; -2.741667)</code></pre>
-<pre><code>## [1] 0.0058</code></pre>
+<pre><code>## [1] 0.004</code></pre>
 <pre class="r"><code>##That is a very small p-value.</code></pre>
 </div>
 <div id="conclusions-drawn-from-randomization-test" class="section level3">
@@ -847,14 +847,14 @@ coeftest(fit1, vcov = vcovHC(fit1))[,1:2]</code></pre>
 samp_skull %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
 <pre><code>## (Intercept) timenum bh_c bl_c nh_c timenum:bh_c
 timenum:bl_c bh_c:bl_c
-## 1 0.4342726 1.747523 0.08708483 0.09202482 0.1630525
-0.4327512 0.500021 0.022932
+## 1 0.4299282 1.769838 0.08691601 0.09237108 0.1619333
+0.4369331 0.516272 0.02303842
 ## timenum:nh_c bh_c:nh_c bl_c:nh_c timenum:bh_c:bl_c
 timenum:bh_c:nh_c timenum:bl_c:nh_c
-## 1 0.5817352 0.02547374 0.03111492 0.1026444 0.1645624
-0.1863416
+## 1 0.5864701 0.02516814 0.0315296 0.1034046 0.1708943
+0.1872418
 ## bh_c:bl_c:nh_c timenum:bh_c:bl_c:nh_c
-## 1 0.005808026 0.03740951</code></pre>
+## 1 0.005667245 0.0375275</code></pre>
 <p>The SEs from the robust model are larger than that of the original model and the SEs that have been bootstrapped are larger than the robust SEs. Since the standard errors are larger for the bootstrapped SE model, the p-value will be larger, and it will be more difficult to reject the null hypotheses from the original regression.</p>
 </div>
 </div>

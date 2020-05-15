@@ -1,14 +1,14 @@
 {
     "collab_server" : "",
     "contents" : "",
-    "created" : 1589578864149.000,
+    "created" : 1589584923135.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
     "hash" : "0",
-    "id" : "575283D9",
-    "lastKnownWriteTime" : 1589578874,
-    "last_content_update" : 1589578874341,
+    "id" : "B84AF381",
+    "lastKnownWriteTime" : 1589584446,
+    "last_content_update" : 1589584446,
     "path" : "~/Desktop/Project_3/Lab 12 Walkthrough code.R",
     "project_path" : null,
     "properties" : {
@@ -18,7 +18,7 @@
     "read_only" : false,
     "read_only_alternatives" : [
     ],
-    "relative_order" : 4,
+    "relative_order" : 1,
     "source_on_save" : false,
     "source_window" : "",
     "type" : "r_source"

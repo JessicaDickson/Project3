@@ -1,0 +1,50 @@
+"0","```r
+
+timezone_means <- idbugs2 %>% 
+  group_by(timezone2) %>%
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>%
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, mean, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+
+timezone_sd <- idbugs2 %>% 
+  group_by(timezone2) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, sd, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+
+timezone.n <- idbugs2 %>% 
+  group_by(timezone2) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, funs(n = n())) %>% 
+  mutate_if(is.numeric, round)
+
+timezone.distinct <- idbugs2 %>% 
+  group_by(timezone2) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, n_distinct) %>% 
+  mutate_if(is.numeric, round)
+
+timezone.Q3 <- idbugs2 %>% 
+  group_by(timezone2) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, list(Q3=quantile), probs=.75, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+
+timezone.Q1 <- idbugs2 %>% 
+  group_by(timezone2) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, list(Q1=quantile), probs=.25, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+```"

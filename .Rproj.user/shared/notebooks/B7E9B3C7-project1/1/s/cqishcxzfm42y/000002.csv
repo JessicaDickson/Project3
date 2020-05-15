@@ -1,0 +1,6 @@
+"0","```r
+cor_idbugs <- idbugs %>% select_if(is.numeric) %>% select(-num_identification_agreements1,-num_identification_disagreements1, -id) %>% na.omit %>% cor
+library(kableExtra)
+cor_idbugs %>% kable() %>%
+  kable_styling(bootstrap_options = c(\"striped\", \"hover\", \"condensed\"))
+```"

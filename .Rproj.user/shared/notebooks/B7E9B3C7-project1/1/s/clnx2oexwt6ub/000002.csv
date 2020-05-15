@@ -1,0 +1,5 @@
+"0","```r
+idbugs3<-idbugs2 %>%
+  select(-id,-time_zone,-observed_on,-description, -quality_grade, -captive_cultivated, -place_guess, -coordinates, -species_guess, -scientific_name, -common_name, -timezone, -num_identification_agreements1, -num_identification_disagreements1) %>%
+  mutate_if(is.character,as.factor)
+```"

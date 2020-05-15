@@ -1,13 +1,14 @@
 ---
 title: "Python Time"
-author: ''
+author: "Sloan Dickson"
 date: '2020-05-15'
 description: ''
 slug: python-time
 tags: []
 categories: []
 ---
-![](static/blog/2020-05-15-python-time_files/dogcat.png)
+
+![](static/blog/2020-05-15-python-time_files/dogcat.png){width=100% height=100%}
 
 #### After taking this computational biology course, I have learned a number of ways to use both R and Python for data science. One of the most interesting things i've learned is how to make R and Python work together to manipulate list variables. I will now demonstrate how to create, sort, and combine lists in python and then manipulate the combined list in R to create a working dataset.
 
@@ -18,15 +19,14 @@ categories: []
 #install.packages("reticulate")
 #install_miniconda()
 library(reticulate)
-use_python("/usr/local/bin/python")
+Sys.setenv(RETICULATE_PYTHON = "/usr/bin/python")
+use_python("usr/bin/python")
 ```
 
 ### Creating two variables
 Creating variables for the amount of time each animal spends in the shelter and whether they are a cat or dog.
 ```{python}
 #Python
-
-import numpy as np
 
 #Time in shelter for each cat (in months)
 cattime = [2, 6, 2, 8, 7, 5, 3, 4, 4]
@@ -123,19 +123,14 @@ shelter %>% group_by(animal) %>% summarise(avg=mean(time))
 shelter %>% group_by(animal) %>% summarise(min=min(time), max=max(time))
 
 ```
+### A Little fun with linear regression
+```{r}
+#now that we've manipulated the data in both python and r and imported it to r. 
 
+fit1<-lm(dist~speed, data=cars) #syntax for simple linear regression
+coef(fit1)
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
+This shows the many possibilities of combining r and 
 
 

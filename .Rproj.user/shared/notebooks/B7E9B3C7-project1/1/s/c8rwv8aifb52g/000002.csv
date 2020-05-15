@@ -1,0 +1,9 @@
+"0","```r
+beetles3 <- beetles2 %>% filter(complete.cases(beetles2))
+usa3 <- usa2 %>% filter(complete.cases(usa2))
+
+(beetles2 %>% count())-(beetles3 %>% count())
+#2257 observations were lost when nas were removed from the beetles dataset
+(usa2 %>% count())-(usa3 %>% count())
+#10852 observations were lost when nas were removed from the beetles dataset
+```"

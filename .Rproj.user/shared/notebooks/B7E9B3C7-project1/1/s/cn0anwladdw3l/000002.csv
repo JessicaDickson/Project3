@@ -1,0 +1,5 @@
+"0","```r
+glimpse(timezone_summary)
+timezone_summary %>% slice(1:10) %>% kable() %>%
+  kable_styling(bootstrap_options = c(\"striped\", \"hover\", \"condensed\"))
+```"

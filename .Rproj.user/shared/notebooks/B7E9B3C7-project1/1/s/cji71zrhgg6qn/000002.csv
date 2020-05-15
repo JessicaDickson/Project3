@@ -1,0 +1,11 @@
+"0","```r
+idbugs %>% names()
+
+idbugs %>% select(-id) %>% select(-num_identification_agreements1) %>% select(-num_identification_disagreements1) %>% summarize_if(is.numeric, mean, na.rm=T)
+idbugs %>% select(-id) %>% select(-num_identification_agreements1) %>% select(-num_identification_disagreements1) %>% summarize_if(is.numeric, sd, na.rm=T)
+idbugs %>% select(-id) %>% select(-num_identification_agreements1) %>% select(-num_identification_disagreements1) %>% summarize_if(is.numeric, funs(n = n()))
+idbugs %>% select(-id) %>% select(-num_identification_agreements1) %>% select(-num_identification_disagreements1) %>% summarize_if(is.numeric, n_distinct)
+idbugs %>% summarize_if(is.numeric, list(Q3=quantile), probs=.75, na.rm=T)
+idbugs %>% summarize_if(is.numeric, list(Q1=quantile), probs=.25, na.rm=T)
+idbugs %>% summarize_all(n_distinct)
+```"

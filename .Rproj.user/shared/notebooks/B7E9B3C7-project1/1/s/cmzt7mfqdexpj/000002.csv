@@ -1,0 +1,6 @@
+"0","```r
+idbugs <- rename(idbugs, agreements=num_identification_agreements)
+idbugs <- rename(idbugs, disagreements=num_identification_disagreements)
+idbugs <- rename(idbugs, positionalaccuracy=positional_accuracy)
+idbugs <- rename(idbugs, accuracyratio=accuracy_ratio)
+```"

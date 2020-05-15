@@ -1,0 +1,8 @@
+"0","```r
+beetles4 <- beetles3 %>% 
+  unite(latitude, longitude, col=\"coordinates\",sep=\",\") %>% 
+  separate(\"taxon_species_name\",into=c(\"Genus\",\"Species\"))
+usa4 <- usa3 %>% 
+  unite(latitude, longitude, col=\"coordinates\",sep=\",\") %>% 
+  separate(\"taxon_species_name\",into=c(\"Genus\",\"Species\"))
+```"

@@ -1,0 +1,13 @@
+"0","```r
+library(tidyverse)
+library(ggplot2)
+library(GGally)
+library(kableExtra)
+library(plotly)
+library(cluster)
+
+world_beetles <- read.csv(\"beetles_2019.csv\")
+usa_insects <- read.csv(\"usa_insects.csv\")
+
+#These datasets are both quite large in number of observations and in the number of variables and will likely need to be edited to be more manageable.
+```"

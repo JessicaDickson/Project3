@@ -1,0 +1,7 @@
+"0","```r
+timezone_m_sd <- left_join(timezone_means, timezone_sd, by=\"timezone2\", suffix=c(\".mean\",\".sd\"))
+timezone_n_dist <- left_join(timezone.n, timezone.distinct, by=\"timezone2\", suffix=c(\".n\",\".distinct\"))
+timezone_Q1_Q3 <- left_join(timezone.Q1, timezone.Q3, by=\"timezone2\", suffix=c(\".Q1\",\".Q3\"))
+
+timezone_summary <- timezone_m_sd %>% full_join(timezone_n_dist) %>% full_join(timezone_Q1_Q3)
+```"

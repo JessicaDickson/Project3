@@ -1,0 +1,9 @@
+"0","```r
+genusspecies_summary <- genusspecies_summary %>% arrange(Species)
+genusspecies_summary <- genusspecies_summary %>% arrange(Species) %>% slice(4:1800)
+genusspecies_summary <- genusspecies_summary %>% na.omit()
+
+genusspecies_summary <- genusspecies_summary %>% na.omit() 
+
+glimpse(genusspecies_summary)
+```"

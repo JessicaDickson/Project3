@@ -1,0 +1,10 @@
+"0","```r
+tidy_timezone_summary <- timezone_summary %>%
+  pivot_longer(cols=c('agreements.mean':'accuracyratio_Q3')) %>%
+  separate(name,into=c(\"Variable\",\"Statistic\")) %>%
+  pivot_wider(names_from=\"Statistic\",values_from=\"value\") %>%
+  select(-\"NA\")
+
+tidy_timezone_summary %>% slice(1:10) %>% kable() %>%
+  kable_styling(bootstrap_options = c(\"striped\", \"hover\", \"condensed\"))
+```"

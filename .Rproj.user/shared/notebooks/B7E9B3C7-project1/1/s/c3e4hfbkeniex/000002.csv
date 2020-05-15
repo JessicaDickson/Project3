@@ -1,0 +1,7 @@
+"0","```r
+ggplot(idbugs2, aes(disagreements, positionalaccuracy)) + 
+  geom_point(aes(color=taxon_family_name)) + 
+  ggtitle(\"Number of Disagreements by Positional Accuracy and faceted Location (timezone)\")+
+  xlab(\"Number of Disagreements in ID\") + ylab(\"Positional Accuracy\") + facet_wrap( ~ timezone2 ) + 
+  theme(legend.position = \"none\")
+```"

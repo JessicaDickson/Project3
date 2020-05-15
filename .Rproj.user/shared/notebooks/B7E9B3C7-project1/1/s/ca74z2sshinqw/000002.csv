@@ -1,0 +1,49 @@
+"0","```r
+genusspecies_means <- idbugs %>% 
+  group_by(Genus, Species) %>%
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>%
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, mean, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+
+genusspecies_sd <- idbugs %>% 
+  group_by(Genus, Species) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, sd, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+
+genusspecies.n <- idbugs %>% 
+  group_by(Genus, Species) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, funs(n = n())) %>% 
+  mutate_if(is.numeric, round)
+
+genusspecies.distinct <- idbugs %>% 
+  group_by(Genus, Species) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, funs(n = n())) %>% 
+  mutate_if(is.numeric, n_distinct)
+
+genusspecies.Q3 <- idbugs %>% 
+  group_by(Genus, Species) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, list(Q3=quantile), probs=.75, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+
+genusspecies.Q1 <- idbugs %>% 
+  group_by(Genus, Species) %>% 
+  select(-id) %>% 
+  select(-num_identification_agreements1) %>% 
+  select(-num_identification_disagreements1) %>%
+  summarize_if(is.numeric, list(Q1=quantile), probs=.25, na.rm=T) %>% 
+  mutate_if(is.numeric, round)
+```"
